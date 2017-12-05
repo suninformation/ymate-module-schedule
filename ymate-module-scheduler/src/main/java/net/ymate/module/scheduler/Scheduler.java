@@ -19,8 +19,11 @@ import net.ymate.module.scheduler.annotation.ScheduleTask;
 import net.ymate.module.scheduler.handle.ScheduleTaskHandler;
 import net.ymate.module.scheduler.impl.DefaultModuleCfg;
 import net.ymate.module.scheduler.support.QuartzScheduleHelper;
+import net.ymate.platform.core.ApplicationEvent;
 import net.ymate.platform.core.Version;
 import net.ymate.platform.core.YMP;
+import net.ymate.platform.core.event.Events;
+import net.ymate.platform.core.event.IEventListener;
 import net.ymate.platform.core.module.IModule;
 import net.ymate.platform.core.module.annotation.Module;
 import net.ymate.platform.core.util.ClassUtils;
@@ -78,7 +81,6 @@ public class Scheduler implements IModule, IScheduler {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void init(YMP owner) throws Exception {
         if (!__inited) {
             //
@@ -86,6 +88,18 @@ public class Scheduler implements IModule, IScheduler {
             //
             __owner = owner;
             __owner.registerHandler(ScheduleTask.class, new ScheduleTaskHandler(this));
+            __owner.getEvents().registerListener(Events.MODE.ASYNC, ApplicationEvent.class, new IEventListener<ApplicationEvent>() {
+                @Override
+                public boolean handle(ApplicationEvent context) {
+                    switch (context.getEventName()) {
+                        case APPLICATION_INITED:
+                            __doStartupTasks();
+                            break;
+                        default:
+                    }
+                    return false;
+                }
+            });
             __moduleCfg = new DefaultModuleCfg(owner);
             //
             __scheduleHelper = QuartzScheduleHelper.bind(StdSchedulerFactory.getDefaultScheduler());
@@ -93,38 +107,42 @@ public class Scheduler implements IModule, IScheduler {
             __tasksMetaMap = new ConcurrentHashMap<String, ScheduleTaskMeta>();
             __tasksConfigMap = new ConcurrentHashMap<String, ITaskConfig>();
             //
-            if (__moduleCfg.getTaskConfigLoader() != null) {
-                List<ITaskConfig> _configs = __moduleCfg.getTaskConfigLoader().load();
-                if (_configs != null) {
-                    for (ITaskConfig _item : _configs) {
-                        Class<IScheduleTask> _targetClass = null;
-                        ScheduleTaskMeta _meta = __tasksMetaMap.get(_item.getName());
-                        if (_meta != null) {
-                            _targetClass = _meta.getTaskClass();
-                        } else {
-                            try {
-                                _targetClass = (Class<IScheduleTask>) ClassUtils.loadClass(_item.getName(), getClass());
-                            } catch (ClassNotFoundException e) {
-                                _LOG.warn("Load task class error: " + _item.getName());
-                            }
+            __scheduleHelper.getScheduler().start();
+            //
+            __inited = true;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void __doStartupTasks() {
+        if (__moduleCfg.getTaskConfigLoader() != null) {
+            List<ITaskConfig> _configs = __moduleCfg.getTaskConfigLoader().load();
+            if (_configs != null) {
+                for (ITaskConfig _item : _configs) {
+                    Class<IScheduleTask> _targetClass = null;
+                    ScheduleTaskMeta _meta = __tasksMetaMap.get(_item.getName());
+                    if (_meta != null) {
+                        _targetClass = _meta.getTaskClass();
+                    } else {
+                        try {
+                            _targetClass = (Class<IScheduleTask>) ClassUtils.loadClass(_item.getName(), getClass());
+                        } catch (ClassNotFoundException e) {
+                            _LOG.warn("Load task class error: " + _item.getName());
                         }
-                        if (_targetClass != null) {
-                            try {
-                                String _taskId = UUIDUtils.UUID().toUpperCase();
-                                __scheduleHelper.addTask(_taskId, _item, _targetClass);
-                                __tasksConfigMap.put(_taskId, _item);
-                                //
-                                _LOG.info("Add task: " + _item.getName() + " - " + _targetClass.getName());
-                            } catch (SchedulerException e) {
-                                _LOG.warn("Add task error: " + _item.getName());
-                            }
+                    }
+                    if (_targetClass != null) {
+                        try {
+                            String _taskId = UUIDUtils.UUID().toUpperCase();
+                            __scheduleHelper.addTask(_taskId, _item, _targetClass);
+                            __tasksConfigMap.put(_taskId, _item);
+                            //
+                            _LOG.info("Add task: " + _item.getName() + " - " + _targetClass.getName());
+                        } catch (SchedulerException e) {
+                            _LOG.warn("Add task error: " + _item.getName());
                         }
                     }
                 }
             }
-            __scheduleHelper.getScheduler().start();
-            //
-            __inited = true;
         }
     }
 
