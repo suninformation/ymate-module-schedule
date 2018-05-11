@@ -20,6 +20,9 @@
     # 调度锁工厂接口实例类, 若未提供则使用默认实现: net.ymate.module.scheduler.impl.DefaultScheduleLockerFactory
     ymp.configs.module.scheduler.schedule_locker_factory_class=
     
+    # 任务调度服务提供者接口实例对象, 若未提供则使用默认实现: net.ymate.module.scheduler.impl.DefaultScheduleProvider
+    ymp.configs.module.scheduler.schedule_provider_class=
+    
     # 计划任务规则配置加载器接口实例对象, 必须参数
     ymp.configs.module.scheduler.task_config_loader_class=
 

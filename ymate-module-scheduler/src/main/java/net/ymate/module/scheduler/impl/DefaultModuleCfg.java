@@ -15,10 +15,7 @@
  */
 package net.ymate.module.scheduler.impl;
 
-import net.ymate.module.scheduler.IScheduleLockerFactory;
-import net.ymate.module.scheduler.IScheduler;
-import net.ymate.module.scheduler.ISchedulerModuleCfg;
-import net.ymate.module.scheduler.ITaskConfigLoader;
+import net.ymate.module.scheduler.*;
 import net.ymate.platform.core.YMP;
 import net.ymate.platform.core.util.ClassUtils;
 
@@ -34,6 +31,8 @@ public class DefaultModuleCfg implements ISchedulerModuleCfg {
 
     private ITaskConfigLoader __taskConfigLoader;
 
+    private IScheduleProvider __scheduleProvider;
+
     public DefaultModuleCfg(YMP owner) {
         Map<String, String> _moduleCfgs = owner.getConfig().getModuleConfigs(IScheduler.MODULE_NAME);
         //
@@ -42,12 +41,22 @@ public class DefaultModuleCfg implements ISchedulerModuleCfg {
             __scheduleLockerFactory = new DefaultScheduleLockerFactory();
         }
         //
+        __scheduleProvider = ClassUtils.impl(_moduleCfgs.get("schedule_provider_class"), IScheduleProvider.class, getClass());
+        if (__scheduleProvider == null) {
+            __scheduleProvider = new DefaultScheduleProvider();
+        }
+        //
         __taskConfigLoader = ClassUtils.impl(_moduleCfgs.get("task_config_loader_class"), ITaskConfigLoader.class, getClass());
     }
 
     @Override
     public IScheduleLockerFactory getScheduleLockerFactory() {
         return __scheduleLockerFactory;
+    }
+
+    @Override
+    public IScheduleProvider getScheduleProvider() {
+        return __scheduleProvider;
     }
 
     @Override

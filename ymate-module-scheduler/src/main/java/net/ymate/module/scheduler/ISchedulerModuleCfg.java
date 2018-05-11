@@ -27,6 +27,11 @@ public interface ISchedulerModuleCfg {
     IScheduleLockerFactory getScheduleLockerFactory();
 
     /**
+     * @return 返回任务调度服务提供者接口实例对象, 若未提供则使用默认实现: net.ymate.module.scheduler.impl.DefaultScheduleProvider
+     */
+    IScheduleProvider getScheduleProvider();
+
+    /**
      * @return 返回计划任务规则配置加载器接口实例对象
      */
     ITaskConfigLoader getTaskConfigLoader();

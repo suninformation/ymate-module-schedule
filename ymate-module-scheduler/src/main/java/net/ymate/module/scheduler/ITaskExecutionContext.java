@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 the original author or authors.
+ * Copyright 2007-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,23 @@
  */
 package net.ymate.module.scheduler;
 
-import org.quartz.Job;
+import java.io.Serializable;
 
 /**
- * 计划任务接口
+ * 任务执行上下文环境对象
  *
- * @author 刘镇 (suninformation@163.com) on 16/5/6 上午3:09
+ * @author 刘镇 (suninformation@163.com) on 2018/5/11 下午4:31
  * @version 1.0
  */
-public interface IScheduleTask extends Job {
+public interface ITaskExecutionContext extends Serializable {
 
     /**
-     * @return 是否采用同步执行(表示相同的计划任务仅能有一个正在执行)
+     * @return 返回当前计划任务ID
      */
-    boolean isSync();
+    String getId();
 
     /**
-     * 执行计划任务
-     *
-     * @param context 任务执行上下文环境对象
-     * @throws TaskExecutionException 任务执行可能产生的任何异常
+     * @return 返回当前计划任务名称
      */
-    void execute(ITaskExecutionContext context) throws TaskExecutionException;
+    String getName();
 }

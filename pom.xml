@@ -19,6 +19,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <ymate.platform.version>2.0.5</ymate.platform.version>
+        <ymate.framework.version>2.0.5</ymate.framework.version>
     </properties>
 
     <developers>
@@ -114,12 +116,12 @@
             <dependency>
                 <groupId>net.ymate.platform</groupId>
                 <artifactId>ymate-platform-core</artifactId>
-                <version>2.0.3</version>
+                <version>${ymate.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.ymate.framework</groupId>
                 <artifactId>ymate-framework-commons</artifactId>
-                <version>2.0.3</version>
+                <version>${ymate.framework.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>

@@ -18,7 +18,6 @@ package net.ymate.module.scheduler;
 import net.ymate.module.scheduler.annotation.ScheduleTask;
 import net.ymate.module.scheduler.handle.ScheduleTaskHandler;
 import net.ymate.module.scheduler.impl.DefaultModuleCfg;
-import net.ymate.module.scheduler.support.QuartzScheduleHelper;
 import net.ymate.platform.core.ApplicationEvent;
 import net.ymate.platform.core.Version;
 import net.ymate.platform.core.YMP;
@@ -27,12 +26,9 @@ import net.ymate.platform.core.event.IEventListener;
 import net.ymate.platform.core.module.IModule;
 import net.ymate.platform.core.module.annotation.Module;
 import net.ymate.platform.core.util.ClassUtils;
-import net.ymate.platform.core.util.RuntimeUtils;
 import net.ymate.platform.core.util.UUIDUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.quartz.SchedulerException;
-import org.quartz.impl.StdSchedulerFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,8 +53,6 @@ public class Scheduler implements IModule, IScheduler {
     private ISchedulerModuleCfg __moduleCfg;
 
     private boolean __inited;
-
-    private QuartzScheduleHelper __scheduleHelper;
 
     private Map<String, ScheduleTaskMeta> __tasksMetaMap;
 
@@ -100,14 +94,11 @@ public class Scheduler implements IModule, IScheduler {
                     return false;
                 }
             });
-            __moduleCfg = new DefaultModuleCfg(owner);
-            //
-            __scheduleHelper = QuartzScheduleHelper.bind(StdSchedulerFactory.getDefaultScheduler());
-            //
             __tasksMetaMap = new ConcurrentHashMap<String, ScheduleTaskMeta>();
             __tasksConfigMap = new ConcurrentHashMap<String, ITaskConfig>();
             //
-            __scheduleHelper.getScheduler().start();
+            __moduleCfg = new DefaultModuleCfg(owner);
+            __moduleCfg.getScheduleProvider().start();
             //
             __inited = true;
         }
@@ -133,7 +124,7 @@ public class Scheduler implements IModule, IScheduler {
                     if (_targetClass != null) {
                         try {
                             String _taskId = UUIDUtils.UUID().toUpperCase();
-                            __scheduleHelper.addTask(_taskId, _item, _targetClass);
+                            __moduleCfg.getScheduleProvider().addTask(_taskId, _item, _targetClass);
                             __tasksConfigMap.put(_taskId, _item);
                             //
                             _LOG.info("Add task: " + _item.getName() + " - " + _targetClass.getName());
@@ -149,11 +140,6 @@ public class Scheduler implements IModule, IScheduler {
     @Override
     public boolean isInited() {
         return __inited;
-    }
-
-    @Override
-    public QuartzScheduleHelper getScheduleHelper() {
-        return __scheduleHelper;
     }
 
     @Override
@@ -180,19 +166,7 @@ public class Scheduler implements IModule, IScheduler {
         if (__inited) {
             __inited = false;
             //
-            try {
-                if (!__scheduleHelper.isShutdown()) {
-                    __scheduleHelper.shutdown(true);
-                }
-            } catch (SchedulerException e) {
-                try {
-                    if (!__scheduleHelper.isShutdown()) {
-                        __scheduleHelper.shutdown();
-                    }
-                } catch (SchedulerException ex) {
-                    _LOG.warn("An exception occurred while shutdown scheduler", RuntimeUtils.unwrapThrow(ex));
-                }
-            }
+            __moduleCfg.getScheduleProvider().shutdown();
             //
             __tasksMetaMap = null;
             //

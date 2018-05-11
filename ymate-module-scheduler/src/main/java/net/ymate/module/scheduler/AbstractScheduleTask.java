@@ -15,6 +15,7 @@
  */
 package net.ymate.module.scheduler;
 
+import net.ymate.module.scheduler.impl.DefaultTaskExecutionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionContext;
@@ -55,6 +56,14 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
+        String _id = context.getJobDetail().getJobDataMap().getString("__ID");
+        String _name = context.getJobDetail().getJobDataMap().getString("__TASK");
+        //
+        execute(new DefaultTaskExecutionContext(_id, _name, context));
+    }
+
+    @Override
+    public void execute(ITaskExecutionContext context) throws TaskExecutionException {
         if (__sync) {
             if (__locker.tryLock()) {
                 try {
@@ -65,7 +74,7 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
                     }
                 }
             } else {
-                _LOG.warn("Task " + context.getJobDetail().getJobDataMap().getString("__task") + " - [" + this.getClass().getName() + "] has been running, Skipped.");
+                _LOG.warn("Task " + context.getName() + " - [" + this.getClass().getName() + "] has been running, Skipped.");
             }
         } else {
             __doExecute(context);
@@ -77,5 +86,5 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
      *
      * @param context 上下文对象
      */
-    protected abstract void __doExecute(JobExecutionContext context);
+    protected abstract void __doExecute(ITaskExecutionContext context);
 }

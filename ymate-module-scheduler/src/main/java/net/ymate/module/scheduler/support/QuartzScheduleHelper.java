@@ -57,7 +57,7 @@ public final class QuartzScheduleHelper {
             return config.getGroup();
         }
         if (config == null || StringUtils.isBlank(config.getName())) {
-            return __PREFIX_GROUP.concat(taskId);
+            return __PREFIX_TASK.concat(taskId);
         }
         return config.getName();
     }

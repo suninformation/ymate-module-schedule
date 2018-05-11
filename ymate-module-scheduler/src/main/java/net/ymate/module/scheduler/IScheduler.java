@@ -15,7 +15,6 @@
  */
 package net.ymate.module.scheduler;
 
-import net.ymate.module.scheduler.support.QuartzScheduleHelper;
 import net.ymate.platform.core.YMP;
 
 import java.util.Map;
@@ -42,11 +41,6 @@ public interface IScheduler {
      * @return 返回模块是否已初始化
      */
     boolean isInited();
-
-    /**
-     * @return 返回计划任务助手类实例
-     */
-    QuartzScheduleHelper getScheduleHelper();
 
     /**
      * 注册计划任务
