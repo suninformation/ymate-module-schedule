@@ -59,32 +59,27 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
         String _id = context.getJobDetail().getJobDataMap().getString("__ID");
         String _name = context.getJobDetail().getJobDataMap().getString("__TASK");
         //
-        execute(new DefaultTaskExecutionContext(_id, _name, context));
-    }
-
-    @Override
-    public void execute(ITaskExecutionContext context) throws TaskExecutionException {
         if (__sync) {
             if (__locker.tryLock()) {
                 try {
-                    __doExecute(context);
+                    __doExecute(new DefaultTaskExecutionContext(_id, _name, context));
                 } finally {
                     if (__locker.isLocked()) {
                         __locker.unlock();
                     }
                 }
             } else {
-                _LOG.warn("Task " + context.getName() + " - [" + this.getClass().getName() + "] has been running, Skipped.");
+                _LOG.warn("Task " + _name + " - [" + this.getClass().getName() + "] has been running, Skipped.");
             }
         } else {
-            __doExecute(context);
+            __doExecute(new DefaultTaskExecutionContext(_id, _name, context));
         }
     }
 
     /**
-     * 执行任务
+     * 执行计划任务
      *
-     * @param context 上下文对象
+     * @param context 任务执行上下文环境对象
      */
     protected abstract void __doExecute(ITaskExecutionContext context);
 }

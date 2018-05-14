@@ -29,12 +29,4 @@ public interface IScheduleTask extends Job {
      * @return 是否采用同步执行(表示相同的计划任务仅能有一个正在执行)
      */
     boolean isSync();
-
-    /**
-     * 执行计划任务
-     *
-     * @param context 任务执行上下文环境对象
-     * @throws TaskExecutionException 任务执行可能产生的任何异常
-     */
-    void execute(ITaskExecutionContext context) throws TaskExecutionException;
 }
