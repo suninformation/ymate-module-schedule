@@ -15,8 +15,8 @@
  */
 package net.ymate.module.scheduler.impl;
 
-import net.ymate.framework.commons.ReentrantLockHelper;
 import net.ymate.module.scheduler.IScheduleLocker;
+import net.ymate.platform.core.support.ReentrantLockHelper;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.commons.lang.StringUtils;
 

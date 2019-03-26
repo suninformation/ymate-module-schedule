@@ -19,8 +19,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ymate.platform.version>2.0.5</ymate.platform.version>
-        <ymate.framework.version>2.0.5</ymate.framework.version>
+        <ymate.platform.version>2.0.6</ymate.platform.version>
+        <ymate.framework.version>2.0.6</ymate.framework.version>
     </properties>
 
     <developers>
@@ -126,7 +126,7 @@
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
-                <version>2.3.0</version>
+                <version>2.3.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

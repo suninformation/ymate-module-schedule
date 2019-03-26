@@ -44,7 +44,7 @@ public class Scheduler implements IModule, IScheduler {
 
     private static final Log _LOG = LogFactory.getLog(Scheduler.class);
 
-    public static final Version VERSION = new Version(1, 0, 0, Scheduler.class.getPackage().getImplementationVersion(), Version.VersionType.Alphal);
+    public static final Version VERSION = new Version(1, 0, 0, Scheduler.class.getPackage().getImplementationVersion(), Version.VersionType.Alpha);
 
     private static volatile IScheduler __instance;
 
