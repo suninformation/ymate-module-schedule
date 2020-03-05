@@ -93,7 +93,7 @@ public class Scheduler implements IModule, IScheduler {
                 scheduleTaskMetas = new ConcurrentHashMap<>(16);
                 boolean isDefaultTaskLoader = config.getTaskConfigLoader() instanceof DefaultTaskConfigLoader;
                 //
-                IBeanLoadFactory beanLoaderFactory = YMP.getBeanLoadFactory();
+                IBeanLoadFactory beanLoaderFactory = owner.getConfigurer().getBeanLoadFactory();
                 if (beanLoaderFactory != null) {
                     IBeanLoader beanLoader = beanLoaderFactory.getBeanLoader();
                     if (beanLoader != null) {

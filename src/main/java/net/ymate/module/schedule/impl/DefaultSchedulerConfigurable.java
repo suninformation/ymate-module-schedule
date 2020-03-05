@@ -15,8 +15,7 @@
  */
 package net.ymate.module.schedule.impl;
 
-import net.ymate.module.schedule.IScheduler;
-import net.ymate.module.schedule.ISchedulerConfig;
+import net.ymate.module.schedule.*;
 import net.ymate.platform.core.module.IModuleConfigurer;
 import net.ymate.platform.core.module.impl.DefaultModuleConfigurable;
 
@@ -45,18 +44,18 @@ public class DefaultSchedulerConfigurable extends DefaultModuleConfigurable {
             return this;
         }
 
-        public Builder lockerFactoryClass(String lockerFactoryClass) {
-            configurable.addConfig(ISchedulerConfig.LOCKER_FACTORY_CLASS, lockerFactoryClass);
+        public Builder lockerFactoryClass(Class<? extends IScheduleLockerFactory> lockerFactoryClass) {
+            configurable.addConfig(ISchedulerConfig.LOCKER_FACTORY_CLASS, lockerFactoryClass.getName());
             return this;
         }
 
-        public Builder providerClass(String providerClass) {
-            configurable.addConfig(ISchedulerConfig.PROVIDER_CLASS, providerClass);
+        public Builder providerClass(Class<? extends IScheduleProvider> providerClass) {
+            configurable.addConfig(ISchedulerConfig.PROVIDER_CLASS, providerClass.getName());
             return this;
         }
 
-        public Builder taskConfigLoaderClass(String taskConfigLoaderClass) {
-            configurable.addConfig(ISchedulerConfig.TASK_CONFIG_LOADER_CLASS, taskConfigLoaderClass);
+        public Builder taskConfigLoaderClass(Class<? extends ITaskConfigLoader> taskConfigLoaderClass) {
+            configurable.addConfig(ISchedulerConfig.TASK_CONFIG_LOADER_CLASS, taskConfigLoaderClass.getName());
             return this;
         }
 
