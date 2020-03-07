@@ -25,6 +25,7 @@ import net.ymate.platform.commons.util.ClassUtils;
 import net.ymate.platform.commons.util.RuntimeUtils;
 import net.ymate.platform.core.ApplicationEvent;
 import net.ymate.platform.core.IApplication;
+import net.ymate.platform.core.IApplicationConfigurer;
 import net.ymate.platform.core.YMP;
 import net.ymate.platform.core.beans.IBeanLoadFactory;
 import net.ymate.platform.core.beans.IBeanLoader;
@@ -82,8 +83,9 @@ public class Scheduler implements IModule, IScheduler {
             YMP.showModuleVersion("ymate-module-schedule", this);
             //
             this.owner = owner;
+            IApplicationConfigurer configurer = owner.getConfigureFactory().getConfigurer();
             if (config == null) {
-                IModuleConfigurer moduleConfigurer = owner.getConfigurer().getModuleConfigurer(MODULE_NAME);
+                IModuleConfigurer moduleConfigurer = configurer.getModuleConfigurer(MODULE_NAME);
                 config = moduleConfigurer == null ? DefaultSchedulerConfig.defaultConfig() : DefaultSchedulerConfig.create(moduleConfigurer);
             }
             if (!config.isInitialized()) {
@@ -93,7 +95,7 @@ public class Scheduler implements IModule, IScheduler {
                 scheduleTaskMetas = new ConcurrentHashMap<>(16);
                 boolean isDefaultTaskLoader = config.getTaskConfigLoader() instanceof DefaultTaskConfigLoader;
                 //
-                IBeanLoadFactory beanLoaderFactory = owner.getConfigurer().getBeanLoadFactory();
+                IBeanLoadFactory beanLoaderFactory = configurer.getBeanLoadFactory();
                 if (beanLoaderFactory != null) {
                     IBeanLoader beanLoader = beanLoaderFactory.getBeanLoader();
                     if (beanLoader != null) {
