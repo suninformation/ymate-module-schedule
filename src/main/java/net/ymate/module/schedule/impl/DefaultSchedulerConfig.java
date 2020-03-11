@@ -59,7 +59,7 @@ public final class DefaultSchedulerConfig implements ISchedulerConfig {
         //
         ScheduleConf confAnn = mainClass == null ? null : mainClass.getAnnotation(ScheduleConf.class);
         //
-        enabled = configReader.getBoolean(ENABLED, confAnn != null && confAnn.enabled());
+        enabled = configReader.getBoolean(ENABLED, confAnn == null || confAnn.enabled());
         //
         if (enabled) {
             scheduleLockerFactory = configReader.getClassImpl(LOCKER_FACTORY_CLASS, confAnn == null || confAnn.lockerFactoryClass().equals(IScheduleLockerFactory.class) ? null : confAnn.lockerFactoryClass().getName(), IScheduleLockerFactory.class);
