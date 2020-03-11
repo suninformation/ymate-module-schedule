@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * @author 刘镇 (suninformation@163.com) on 2017/12/06 01:14
  */
-public class DefaultTaskConfig implements ITaskConfig {
+public final class DefaultTaskConfig implements ITaskConfig {
 
     private String id;
 

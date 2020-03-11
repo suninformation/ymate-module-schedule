@@ -23,16 +23,14 @@ import net.ymate.module.schedule.impl.DefaultSchedulerConfig;
 import net.ymate.module.schedule.impl.DefaultTaskConfigLoader;
 import net.ymate.platform.commons.util.ClassUtils;
 import net.ymate.platform.commons.util.RuntimeUtils;
-import net.ymate.platform.core.ApplicationEvent;
-import net.ymate.platform.core.IApplication;
-import net.ymate.platform.core.IApplicationConfigurer;
-import net.ymate.platform.core.YMP;
+import net.ymate.platform.core.*;
 import net.ymate.platform.core.beans.IBeanLoadFactory;
 import net.ymate.platform.core.beans.IBeanLoader;
 import net.ymate.platform.core.event.Events;
 import net.ymate.platform.core.event.IEventListener;
 import net.ymate.platform.core.module.IModule;
 import net.ymate.platform.core.module.IModuleConfigurer;
+import net.ymate.platform.core.module.impl.DefaultModuleConfigurer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author 刘镇 (suninformation@163.com) on 2020/01/11 13:11
  */
-public class Scheduler implements IModule, IScheduler {
+public final class Scheduler implements IModule, IScheduler {
 
     private static final Log LOG = LogFactory.getLog(Scheduler.class);
 
@@ -83,30 +81,39 @@ public class Scheduler implements IModule, IScheduler {
             YMP.showModuleVersion("ymate-module-schedule", this);
             //
             this.owner = owner;
-            IApplicationConfigurer configurer = owner.getConfigureFactory().getConfigurer();
+            IApplicationConfigureFactory configureFactory = owner.getConfigureFactory();
+            IApplicationConfigurer configurer = null;
+            if (configureFactory != null) {
+                configurer = configureFactory.getConfigurer();
+                IModuleConfigurer moduleConfigurer = configurer == null ? null : configurer.getModuleConfigurer(MODULE_NAME);
+                if (moduleConfigurer != null) {
+                    config = DefaultSchedulerConfig.create(configureFactory.getMainClass(), moduleConfigurer);
+                } else {
+                    config = DefaultSchedulerConfig.create(configureFactory.getMainClass(), DefaultModuleConfigurer.createEmpty(MODULE_NAME));
+                }
+            }
             if (config == null) {
-                IModuleConfigurer moduleConfigurer = configurer.getModuleConfigurer(MODULE_NAME);
-                config = moduleConfigurer == null ? DefaultSchedulerConfig.defaultConfig() : DefaultSchedulerConfig.create(moduleConfigurer);
+                config = DefaultSchedulerConfig.defaultConfig();
             }
             if (!config.isInitialized()) {
                 config.initialize(this);
             }
             if (config.isEnabled()) {
                 scheduleTaskMetas = new ConcurrentHashMap<>(16);
-                boolean isDefaultTaskLoader = config.getTaskConfigLoader() instanceof DefaultTaskConfigLoader;
-                //
-                IBeanLoadFactory beanLoaderFactory = configurer.getBeanLoadFactory();
-                if (beanLoaderFactory != null) {
-                    IBeanLoader beanLoader = beanLoaderFactory.getBeanLoader();
-                    if (beanLoader != null) {
-                        beanLoader.registerHandler(ScheduleTask.class, new ScheduleTaskHandler(this));
-                        if (isDefaultTaskLoader) {
-                            beanLoader.registerHandler(TaskConfigLoader.class, new TaskConfigLoaderHandler(this));
-                            //
-                            TaskConfigsHandler taskConfigsHandler = new TaskConfigsHandler(this);
-                            beanLoader.registerHandler(TaskConfigGroups.class, taskConfigsHandler);
-                            beanLoader.registerHandler(TaskConfigs.class, taskConfigsHandler);
-                            beanLoader.registerHandler(TaskConfig.class, taskConfigsHandler);
+                if (configurer != null) {
+                    IBeanLoadFactory beanLoaderFactory = configurer.getBeanLoadFactory();
+                    if (beanLoaderFactory != null) {
+                        IBeanLoader beanLoader = beanLoaderFactory.getBeanLoader();
+                        if (beanLoader != null) {
+                            beanLoader.registerHandler(ScheduleTask.class, new ScheduleTaskHandler(this));
+                            if (config.getTaskConfigLoader() instanceof DefaultTaskConfigLoader) {
+                                beanLoader.registerHandler(TaskConfigLoader.class, new TaskConfigLoaderHandler(this));
+                                //
+                                TaskConfigsHandler taskConfigsHandler = new TaskConfigsHandler(this);
+                                beanLoader.registerHandler(TaskConfigGroups.class, taskConfigsHandler);
+                                beanLoader.registerHandler(TaskConfigs.class, taskConfigsHandler);
+                                beanLoader.registerHandler(TaskConfig.class, taskConfigsHandler);
+                            }
                         }
                     }
                 }

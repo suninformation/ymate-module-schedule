@@ -22,7 +22,7 @@ import net.ymate.platform.core.module.impl.DefaultModuleConfigurable;
 /**
  * @author 刘镇 (suninformation@163.com) on 2020/02/07 21:02
  */
-public class DefaultSchedulerConfigurable extends DefaultModuleConfigurable {
+public final class DefaultSchedulerConfigurable extends DefaultModuleConfigurable {
 
     public static Builder builder() {
         return new Builder();

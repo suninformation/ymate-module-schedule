@@ -16,13 +16,14 @@
 package net.ymate.module.schedule.impl;
 
 import net.ymate.module.schedule.*;
+import net.ymate.module.schedule.annotation.ScheduleConf;
 import net.ymate.platform.core.configuration.IConfigReader;
 import net.ymate.platform.core.module.IModuleConfigurer;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2020/01/11 13:11
  */
-public class DefaultSchedulerConfig implements ISchedulerConfig {
+public final class DefaultSchedulerConfig implements ISchedulerConfig {
 
     private boolean enabled = true;
 
@@ -39,7 +40,11 @@ public class DefaultSchedulerConfig implements ISchedulerConfig {
     }
 
     public static DefaultSchedulerConfig create(IModuleConfigurer moduleConfigurer) {
-        return new DefaultSchedulerConfig(moduleConfigurer);
+        return new DefaultSchedulerConfig(null, moduleConfigurer);
+    }
+
+    public static DefaultSchedulerConfig create(Class<?> mainClass, IModuleConfigurer moduleConfigurer) {
+        return new DefaultSchedulerConfig(mainClass, moduleConfigurer);
     }
 
     public static Builder builder() {
@@ -49,15 +54,17 @@ public class DefaultSchedulerConfig implements ISchedulerConfig {
     private DefaultSchedulerConfig() {
     }
 
-    private DefaultSchedulerConfig(IModuleConfigurer moduleConfigurer) {
+    private DefaultSchedulerConfig(Class<?> mainClass, IModuleConfigurer moduleConfigurer) {
         IConfigReader configReader = moduleConfigurer.getConfigReader();
         //
-        enabled = configReader.getBoolean(ENABLED, true);
+        ScheduleConf confAnn = mainClass == null ? null : mainClass.getAnnotation(ScheduleConf.class);
+        //
+        enabled = configReader.getBoolean(ENABLED, confAnn != null && confAnn.enabled());
         //
         if (enabled) {
-            scheduleLockerFactory = configReader.getClassImpl(LOCKER_FACTORY_CLASS, IScheduleLockerFactory.class);
-            scheduleProvider = configReader.getClassImpl(PROVIDER_CLASS, IScheduleProvider.class);
-            taskConfigLoader = configReader.getClassImpl(TASK_CONFIG_LOADER_CLASS, ITaskConfigLoader.class);
+            scheduleLockerFactory = configReader.getClassImpl(LOCKER_FACTORY_CLASS, confAnn == null || confAnn.lockerFactoryClass().equals(IScheduleLockerFactory.class) ? null : confAnn.lockerFactoryClass().getName(), IScheduleLockerFactory.class);
+            scheduleProvider = configReader.getClassImpl(PROVIDER_CLASS, confAnn == null || confAnn.providerClass().equals(IScheduleProvider.class) ? null : confAnn.providerClass().getName(), IScheduleProvider.class);
+            taskConfigLoader = configReader.getClassImpl(TASK_CONFIG_LOADER_CLASS, confAnn == null || confAnn.taskConfigLoaderClass().equals(ITaskConfigLoader.class) ? null : confAnn.taskConfigLoaderClass().getName(), ITaskConfigLoader.class);
         }
     }
 
