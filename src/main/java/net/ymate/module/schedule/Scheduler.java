@@ -78,7 +78,7 @@ public final class Scheduler implements IModule, IScheduler {
     public void initialize(IApplication owner) throws Exception {
         if (!initialized) {
             //
-            YMP.showModuleVersion("ymate-module-schedule", this);
+            YMP.showVersion("Initializing ymate-module-schedule-${version}", new Version(1, 0, 0, Version.VersionType.Alpha));
             //
             this.owner = owner;
             IApplicationConfigureFactory configureFactory = owner.getConfigureFactory();
