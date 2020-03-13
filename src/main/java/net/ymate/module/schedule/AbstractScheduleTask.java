@@ -30,7 +30,7 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
 
     private final IScheduleLocker scheduleLocker;
 
-    private boolean sync;
+    private final boolean sync;
 
     public AbstractScheduleTask() {
         this(false);

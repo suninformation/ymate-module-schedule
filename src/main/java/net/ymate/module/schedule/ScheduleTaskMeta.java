@@ -25,11 +25,11 @@ import java.io.Serializable;
  */
 public class ScheduleTaskMeta implements Serializable {
 
-    private String name;
+    private final String name;
 
-    private String description;
+    private final String description;
 
-    private Class<? extends IScheduleTask> taskClass;
+    private final Class<? extends IScheduleTask> taskClass;
 
     public ScheduleTaskMeta(String name, String description, Class<? extends IScheduleTask> taskClass) {
         if (taskClass == null) {

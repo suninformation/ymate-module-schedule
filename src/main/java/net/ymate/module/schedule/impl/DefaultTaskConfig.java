@@ -36,9 +36,9 @@ public final class DefaultTaskConfig implements ITaskConfig {
 
     private String cron;
 
-    private List<JobListener> listeners = new ArrayList<>();
+    private final List<JobListener> listeners = new ArrayList<>();
 
-    private Map<String, String> params = new HashMap<>();
+    private final Map<String, String> params = new HashMap<>();
 
     public static Builder builder() {
         return new Builder();

@@ -24,13 +24,13 @@ import org.quartz.JobExecutionContext;
  */
 public class DefaultTaskExecutionContext implements ITaskExecutionContext {
 
-    private String id;
+    private final String id;
 
-    private String name;
+    private final String name;
 
-    private String group;
+    private final String group;
 
-    private JobExecutionContext context;
+    private final JobExecutionContext context;
 
     public DefaultTaskExecutionContext(JobExecutionContext context) {
         this.id = context.getTrigger().getKey().getName();

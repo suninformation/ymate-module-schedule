@@ -25,7 +25,7 @@ import net.ymate.platform.core.beans.IBeanHandler;
  */
 public class ScheduleTaskHandler implements IBeanHandler {
 
-    private IScheduler owner;
+    private final IScheduler owner;
 
     public ScheduleTaskHandler(IScheduler owner) {
         this.owner = owner;

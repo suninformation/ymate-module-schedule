@@ -26,7 +26,7 @@ import net.ymate.platform.core.beans.IBeanHandler;
  */
 public class TaskConfigLoaderHandler implements IBeanHandler {
 
-    private IScheduler owner;
+    private final IScheduler owner;
 
     public TaskConfigLoaderHandler(IScheduler owner) {
         this.owner = owner;

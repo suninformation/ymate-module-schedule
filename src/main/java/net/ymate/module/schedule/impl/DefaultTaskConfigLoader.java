@@ -33,9 +33,9 @@ public final class DefaultTaskConfigLoader implements ITaskConfigLoader {
 
     private static final Log LOG = LogFactory.getLog(DefaultTaskConfigLoader.class);
 
-    private IScheduler owner;
+    private final IScheduler owner;
 
-    private Map<String, ITaskConfig> taskConfigs = new ConcurrentHashMap<>();
+    private final Map<String, ITaskConfig> taskConfigs = new ConcurrentHashMap<>();
 
     public DefaultTaskConfigLoader(IScheduler owner) {
         this.owner = owner;

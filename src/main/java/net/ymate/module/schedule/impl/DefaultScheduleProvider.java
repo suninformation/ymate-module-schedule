@@ -34,7 +34,7 @@ public class DefaultScheduleProvider implements IScheduleProvider {
 
     private static final Log LOG = LogFactory.getLog(DefaultScheduleProvider.class);
 
-    private QuartzScheduleHelper quartzScheduleHelper;
+    private final QuartzScheduleHelper quartzScheduleHelper;
 
     public DefaultScheduleProvider() throws Exception {
         quartzScheduleHelper = QuartzScheduleHelper.bind(StdSchedulerFactory.getDefaultScheduler());
