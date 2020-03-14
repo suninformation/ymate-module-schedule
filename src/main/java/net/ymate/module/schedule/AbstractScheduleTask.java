@@ -66,8 +66,8 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
                         scheduleLocker.unlock();
                     }
                 }
-            } else {
-                LOG.warn(String.format("Task %s.%s (%s) - %s has been running, Skipped.", executionContext.getGroup(), executionContext.getId(), executionContext.getName(), this.getClass().getName()));
+            } else if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Task %s.%s (%s) - %s has been running, Skipped.", executionContext.getGroup(), executionContext.getId(), executionContext.getName(), this.getClass().getName()));
             }
         } else {
             execute(executionContext);

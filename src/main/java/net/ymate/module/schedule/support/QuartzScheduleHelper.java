@@ -91,8 +91,8 @@ public final class QuartzScheduleHelper {
                     scheduler.getListenerManager().addJobListener(listener);
                 }
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info(String.format("Add task %s.%s (%s) - %s with cron: %s", triggerKey.getGroup(), triggerKey.getName(), config.getName(), taskClass.getName(), config.getCron()));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Add task %s.%s (%s) - %s with cron: %s", triggerKey.getGroup(), triggerKey.getName(), config.getName(), taskClass.getName(), config.getCron()));
             }
             return true;
         }
@@ -119,8 +119,8 @@ public final class QuartzScheduleHelper {
                     .withSchedule(CronScheduleBuilder.cronSchedule(config.getCron())).build();
             scheduler.rescheduleJob(triggerKey, trigger);
             //
-            if (LOG.isInfoEnabled()) {
-                LOG.info(String.format("Update task %s.%s with cron: %s", triggerKey.getGroup(), triggerKey.getName(), config.getCron()));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Update task %s.%s with cron: %s", triggerKey.getGroup(), triggerKey.getName(), config.getCron()));
             }
         }
     }
@@ -196,8 +196,8 @@ public final class QuartzScheduleHelper {
         if (jobKey != null) {
             this.scheduler.pauseJob(jobKey);
             //
-            if (LOG.isInfoEnabled()) {
-                LOG.info(String.format("Pause task %s.%s", jobKey.getGroup(), jobKey.getName()));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Pause task %s.%s", jobKey.getGroup(), jobKey.getName()));
             }
         }
     }
@@ -206,8 +206,8 @@ public final class QuartzScheduleHelper {
         if (StringUtils.isNotBlank(group)) {
             this.scheduler.pauseJobs(GroupMatcher.groupEquals(group));
             //
-            if (LOG.isInfoEnabled()) {
-                LOG.info(String.format("Pause task group %s", group));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Pause task group %s", group));
             }
         }
     }
@@ -227,8 +227,8 @@ public final class QuartzScheduleHelper {
         if (jobKey != null) {
             this.scheduler.resumeJob(jobKey);
             //
-            if (LOG.isInfoEnabled()) {
-                LOG.info(String.format("Resume task %s.%s", jobKey.getGroup(), jobKey.getName()));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Resume task %s.%s", jobKey.getGroup(), jobKey.getName()));
             }
         }
     }
@@ -237,8 +237,8 @@ public final class QuartzScheduleHelper {
         if (StringUtils.isNotBlank(group)) {
             this.scheduler.resumeJobs(GroupMatcher.groupEquals(group));
             //
-            if (LOG.isInfoEnabled()) {
-                LOG.info(String.format("Resume task group %s", group));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Resume task group %s", group));
             }
         }
     }
@@ -258,8 +258,8 @@ public final class QuartzScheduleHelper {
         if (jobKey != null) {
             this.scheduler.deleteJob(jobKey);
             //
-            if (LOG.isInfoEnabled()) {
-                LOG.info(String.format("Delete task %s.%s", jobKey.getGroup(), jobKey.getName()));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Delete task %s.%s", jobKey.getGroup(), jobKey.getName()));
             }
         }
     }
@@ -269,8 +269,8 @@ public final class QuartzScheduleHelper {
             List<JobKey> jobKeys = new ArrayList<>(getJobKeys(group));
             this.scheduler.deleteJobs(jobKeys);
             //
-            if (LOG.isInfoEnabled()) {
-                LOG.info(String.format("Delete task group %s - keys: %s", group, jobKeys));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Delete task group %s - keys: %s", group, jobKeys));
             }
         }
     }
@@ -290,8 +290,8 @@ public final class QuartzScheduleHelper {
         if (jobKey != null) {
             this.scheduler.triggerJob(jobKey);
             //
-            if (LOG.isInfoEnabled()) {
-                LOG.info(String.format("Trigger task %s.%s", jobKey.getGroup(), jobKey.getName()));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Trigger task %s.%s", jobKey.getGroup(), jobKey.getName()));
             }
         }
     }
@@ -302,8 +302,8 @@ public final class QuartzScheduleHelper {
     public void pauseAll() throws SchedulerException {
         this.scheduler.pauseAll();
         //
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Pause all tasks");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Pause all tasks");
         }
     }
 
@@ -313,8 +313,8 @@ public final class QuartzScheduleHelper {
     public void resumeAll() throws SchedulerException {
         this.scheduler.resumeAll();
         //
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Resume all tasks");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Resume all tasks");
         }
     }
 
