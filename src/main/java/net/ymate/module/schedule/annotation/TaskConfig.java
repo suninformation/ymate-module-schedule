@@ -37,22 +37,22 @@ public @interface TaskConfig {
     String id() default StringUtils.EMPTY;
 
     /**
-     * 计划任务名称或类名称
+     * @return 计划任务名称或类名称
      */
     String name();
 
     /**
-     * 任务执行规则表达式
+     * @return 任务执行规则表达式
      */
     String cron();
 
     /**
-     * 任务监听器集合
+     * @return 任务监听器集合
      */
     Class<? extends JobListener>[] listeners() default {};
 
     /**
-     * 任务扩展参数
+     * @return 任务扩展参数
      */
     String[] params() default {};
 }

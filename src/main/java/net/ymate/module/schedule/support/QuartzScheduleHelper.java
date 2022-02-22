@@ -298,6 +298,8 @@ public final class QuartzScheduleHelper {
 
     /**
      * 暂停所以的计划执行的任务
+     *
+     * @throws SchedulerException 可能产生的调度异常
      */
     public void pauseAll() throws SchedulerException {
         this.scheduler.pauseAll();
@@ -309,6 +311,8 @@ public final class QuartzScheduleHelper {
 
     /**
      * 恢复所有被暂停的计划任务
+     *
+     * @throws SchedulerException 可能产生的调度异常
      */
     public void resumeAll() throws SchedulerException {
         this.scheduler.resumeAll();

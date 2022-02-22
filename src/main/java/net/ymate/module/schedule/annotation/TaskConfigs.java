@@ -31,7 +31,7 @@ import java.lang.annotation.RetentionPolicy;
 public @interface TaskConfigs {
 
     /**
-     * 分组名称
+     * @return 分组名称
      */
     String group() default StringUtils.EMPTY;
 
