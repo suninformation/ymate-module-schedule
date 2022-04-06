@@ -16,6 +16,8 @@
 package net.ymate.module.schedule;
 
 import net.ymate.platform.core.beans.annotation.Ignored;
+import net.ymate.platform.core.support.IDestroyable;
+import net.ymate.platform.core.support.IInitialization;
 
 import java.util.Collection;
 
@@ -25,7 +27,7 @@ import java.util.Collection;
  * @author 刘镇 (suninformation@163.com) on 2017/12/06 00:19
  */
 @Ignored
-public interface ITaskConfigLoader {
+public interface ITaskConfigLoader extends IInitialization<IScheduler>, IDestroyable {
 
     /**
      * 加载计划任务规则配置

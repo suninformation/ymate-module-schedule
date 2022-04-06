@@ -151,6 +151,9 @@ public final class Scheduler implements IModule, IScheduler {
                     if (taskClass != null) {
                         try {
                             config.getScheduleProvider().addTask(taskConfig, taskClass);
+                            if (owner.isDevEnv() && LOG.isDebugEnabled()) {
+                                LOG.debug(String.format("Added task %s.%s_%s[cron=%s, params=%s].", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getName(), taskConfig.getId(), taskConfig.getCron(), taskConfig.getParams()));
+                            }
                         } catch (SchedulerException e) {
                             if (LOG.isWarnEnabled()) {
                                 LOG.warn(String.format("An exception occurred when adding task '%s.%s (%s) - %s':", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getId(), taskConfig.getName(), taskClass.getName()), RuntimeUtils.unwrapThrow(e));
@@ -182,7 +185,9 @@ public final class Scheduler implements IModule, IScheduler {
             initialized = false;
             //
             if (config.isEnabled()) {
-                config.getScheduleProvider().shutdown();
+                config.getScheduleLockerFactory().close();
+                config.getScheduleProvider().close();
+                config.getTaskConfigLoader().close();
                 scheduleTaskMetas = null;
             }
             //
@@ -207,6 +212,9 @@ public final class Scheduler implements IModule, IScheduler {
         if (scheduleTaskAnn != null) {
             ScheduleTaskMeta taskMeta = new ScheduleTaskMeta(scheduleTaskAnn.name(), scheduleTaskAnn.description(), targetClass);
             scheduleTaskMetas.put(taskMeta.getName(), taskMeta);
+            if (owner.isDevEnv() && LOG.isDebugEnabled()) {
+                LOG.debug(String.format("ScheduleTask class [%s:%s] registered.", taskMeta.getName(), taskMeta.getTaskClass().getName()));
+            }
         }
     }
 }

@@ -16,6 +16,8 @@
 package net.ymate.module.schedule;
 
 import net.ymate.platform.core.beans.annotation.Ignored;
+import net.ymate.platform.core.support.IDestroyable;
+import net.ymate.platform.core.support.IInitialization;
 
 import java.util.List;
 
@@ -25,7 +27,7 @@ import java.util.List;
  * @author 刘镇 (suninformation@163.com) on 2017/12/07 04:01
  */
 @Ignored
-public interface IScheduleProvider {
+public interface IScheduleProvider extends IInitialization<IScheduler>, IDestroyable {
 
     /**
      * 启动服务

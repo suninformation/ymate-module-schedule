@@ -33,12 +33,35 @@ public final class DefaultTaskConfigLoader implements ITaskConfigLoader {
 
     private static final Log LOG = LogFactory.getLog(DefaultTaskConfigLoader.class);
 
-    private final IScheduler owner;
+    private IScheduler owner;
+
+    private boolean initialized;
 
     private final Map<String, ITaskConfig> taskConfigs = new ConcurrentHashMap<>();
 
-    public DefaultTaskConfigLoader(IScheduler owner) {
-        this.owner = owner;
+    public DefaultTaskConfigLoader() {
+    }
+
+    @Override
+    public void initialize(IScheduler owner) throws Exception {
+        if (!initialized) {
+            this.owner = owner;
+            initialized = true;
+        }
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (initialized) {
+            initialized = false;
+            taskConfigs.clear();
+            owner = null;
+        }
     }
 
     @Override
@@ -52,7 +75,7 @@ public final class DefaultTaskConfigLoader implements ITaskConfigLoader {
             if (StringUtils.isNotBlank(taskCron)) {
                 if (StringUtils.equalsIgnoreCase(taskCron, ITaskConfig.DISABLED)) {
                     if (LOG.isInfoEnabled()) {
-                        LOG.info(String.format("Task %s.%s_%s has been disabled.", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getName(), taskConfig.getId()));
+                        LOG.info(String.format("TaskConfig %s.%s_%s has been disabled.", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getName(), taskConfig.getId()));
                     }
                 } else {
                     taskConfigs.put(taskConfig.getId(), DefaultTaskConfig.duplicate(taskConfig).cron(taskCron).build());
@@ -60,8 +83,8 @@ public final class DefaultTaskConfigLoader implements ITaskConfigLoader {
             } else {
                 taskConfigs.put(taskConfig.getId(), taskConfig);
             }
-        } else {
-            taskConfigs.put(taskConfig.getId(), taskConfig);
+        } else if (LOG.isWarnEnabled()) {
+            LOG.warn(String.format("TaskConfig '%s.%s' not set id value, ignored.", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getName()));
         }
     }
 

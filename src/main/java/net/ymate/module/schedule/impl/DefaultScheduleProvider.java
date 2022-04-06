@@ -15,10 +15,7 @@
  */
 package net.ymate.module.schedule.impl;
 
-import net.ymate.module.schedule.IScheduleProvider;
-import net.ymate.module.schedule.IScheduleTask;
-import net.ymate.module.schedule.ITaskConfig;
-import net.ymate.module.schedule.SchedulerException;
+import net.ymate.module.schedule.*;
 import net.ymate.module.schedule.support.QuartzScheduleHelper;
 import net.ymate.platform.commons.util.RuntimeUtils;
 import org.apache.commons.logging.Log;
@@ -34,15 +31,43 @@ public class DefaultScheduleProvider implements IScheduleProvider {
 
     private static final Log LOG = LogFactory.getLog(DefaultScheduleProvider.class);
 
-    private final QuartzScheduleHelper quartzScheduleHelper;
+    private QuartzScheduleHelper quartzScheduleHelper;
+
+    private IScheduler owner;
+
+    private boolean initialized;
 
     public DefaultScheduleProvider() throws Exception {
-        quartzScheduleHelper = QuartzScheduleHelper.bind(StdSchedulerFactory.getDefaultScheduler());
+    }
+
+    @Override
+    public void initialize(IScheduler owner) throws Exception {
+        if (!initialized) {
+            this.owner = owner;
+            this.quartzScheduleHelper = QuartzScheduleHelper.bind(owner, StdSchedulerFactory.getDefaultScheduler());
+            this.initialized = true;
+        }
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    public IScheduler getOwner() {
+        return owner;
+    }
+
+    @Override
+    public void close() throws Exception {
+        shutdown();
     }
 
     @Override
     public void start() throws Exception {
-        quartzScheduleHelper.getScheduler().start();
+        if (!quartzScheduleHelper.getScheduler().isStarted()) {
+            quartzScheduleHelper.getScheduler().start();
+        }
     }
 
     @Override

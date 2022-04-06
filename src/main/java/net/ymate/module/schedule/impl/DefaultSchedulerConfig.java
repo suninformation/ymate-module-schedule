@@ -17,6 +17,7 @@ package net.ymate.module.schedule.impl;
 
 import net.ymate.module.schedule.*;
 import net.ymate.module.schedule.annotation.ScheduleConf;
+import net.ymate.platform.commons.util.ClassUtils;
 import net.ymate.platform.core.configuration.IConfigReader;
 import net.ymate.platform.core.module.IModuleConfigurer;
 
@@ -73,14 +74,19 @@ public final class DefaultSchedulerConfig implements ISchedulerConfig {
         if (!initialized) {
             if (enabled) {
                 if (scheduleLockerFactory == null) {
-                    scheduleLockerFactory = new DefaultScheduleLockerFactory();
+                    scheduleLockerFactory = ClassUtils.loadClass(IScheduleLockerFactory.class, DefaultScheduleLockerFactory.class);
                 }
+                scheduleLockerFactory.initialize(owner);
+                //
                 if (scheduleProvider == null) {
-                    scheduleProvider = new DefaultScheduleProvider();
+                    scheduleProvider = ClassUtils.loadClass(IScheduleProvider.class, DefaultScheduleProvider.class);
                 }
+                scheduleProvider.initialize(owner);
+                //
                 if (taskConfigLoader == null) {
-                    taskConfigLoader = new DefaultTaskConfigLoader(owner);
+                    taskConfigLoader = ClassUtils.loadClass(ITaskConfigLoader.class, DefaultTaskConfigLoader.class);
                 }
+                taskConfigLoader.initialize(owner);
             }
             initialized = true;
         }

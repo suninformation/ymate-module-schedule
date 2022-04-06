@@ -17,11 +17,41 @@ package net.ymate.module.schedule.impl;
 
 import net.ymate.module.schedule.IScheduleLocker;
 import net.ymate.module.schedule.IScheduleLockerFactory;
+import net.ymate.module.schedule.IScheduler;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2017/12/03 16:47
  */
 public class DefaultScheduleLockerFactory implements IScheduleLockerFactory {
+
+    private IScheduler owner;
+
+    private boolean initialized;
+
+    @Override
+    public void initialize(IScheduler owner) throws Exception {
+        if (!initialized) {
+            this.owner = owner;
+            initialized = true;
+        }
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    public IScheduler getOwner() {
+        return owner;
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (initialized) {
+            initialized = false;
+            owner = null;
+        }
+    }
 
     @Override
     public IScheduleLocker getScheduleLocker(String lockerName) {

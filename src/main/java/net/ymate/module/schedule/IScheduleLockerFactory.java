@@ -16,6 +16,8 @@
 package net.ymate.module.schedule;
 
 import net.ymate.platform.core.beans.annotation.Ignored;
+import net.ymate.platform.core.support.IDestroyable;
+import net.ymate.platform.core.support.IInitialization;
 
 /**
  * 调度锁工厂接口定义
@@ -23,7 +25,7 @@ import net.ymate.platform.core.beans.annotation.Ignored;
  * @author 刘镇 (suninformation@163.com) on 2017/12/03 01:10
  */
 @Ignored
-public interface IScheduleLockerFactory {
+public interface IScheduleLockerFactory extends IInitialization<IScheduler>, IDestroyable {
 
     /**
      * 获取调度锁接口实现类对象
