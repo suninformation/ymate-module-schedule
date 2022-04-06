@@ -50,6 +50,13 @@ public interface ITaskExecutionContext extends Serializable {
     String getGroup();
 
     /**
+     * 获取所属模块实例
+     *
+     * @return 返回模块实例对象
+     */
+    IScheduler getOwner();
+
+    /**
      * 获取指定参数key的字符串值
      *
      * @param key 键名

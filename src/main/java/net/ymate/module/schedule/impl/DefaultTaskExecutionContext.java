@@ -15,9 +15,12 @@
  */
 package net.ymate.module.schedule.impl;
 
+import net.ymate.module.schedule.IScheduler;
 import net.ymate.module.schedule.ITaskExecutionContext;
 import net.ymate.module.schedule.support.QuartzScheduleHelper;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
+import org.quartz.TriggerKey;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2018/05/11 16:58
@@ -30,12 +33,21 @@ public class DefaultTaskExecutionContext implements ITaskExecutionContext {
 
     private final String group;
 
+    private final IScheduler owner;
+
+    private final JobDataMap detailJobDataMap;
+
     private final JobExecutionContext context;
 
     public DefaultTaskExecutionContext(JobExecutionContext context) {
-        this.id = context.getTrigger().getKey().getName();
-        this.group = context.getTrigger().getKey().getGroup();
-        this.name = context.getJobDetail().getJobDataMap().getString(QuartzScheduleHelper.TASK_NAME);
+        TriggerKey triggerKey = context.getTrigger().getKey();
+        this.id = triggerKey.getName();
+        this.group = triggerKey.getGroup();
+        //
+        detailJobDataMap = context.getJobDetail().getJobDataMap();
+        this.name = detailJobDataMap.getString(QuartzScheduleHelper.TASK_NAME);
+        this.owner = (IScheduler) detailJobDataMap.get(IScheduler.class.getName());
+        //
         this.context = context;
     }
 
@@ -55,13 +67,18 @@ public class DefaultTaskExecutionContext implements ITaskExecutionContext {
     }
 
     @Override
+    public IScheduler getOwner() {
+        return owner;
+    }
+
+    @Override
     public String getParamStr(String key) {
-        return context.getJobDetail().getJobDataMap().getString(key);
+        return detailJobDataMap.getString(key);
     }
 
     @Override
     public Object getParamObject(String key) {
-        return context.getJobDetail().getJobDataMap().get(key);
+        return detailJobDataMap.get(key);
     }
 
     @Override

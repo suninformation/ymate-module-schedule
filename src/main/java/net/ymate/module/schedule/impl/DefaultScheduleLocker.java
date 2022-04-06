@@ -39,7 +39,7 @@ public class DefaultScheduleLocker implements IScheduleLocker {
         try {
             reentrantLock = ReentrantLockHelper.DEFAULT.getLocker(lockerName);
         } catch (Exception e) {
-            throw new SchedulerException(e.getMessage(), RuntimeUtils.unwrapThrow(e));
+            throw new SchedulerException(e.getMessage(), e);
         }
     }
 

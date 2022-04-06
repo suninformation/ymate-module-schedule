@@ -37,7 +37,7 @@ public class TaskConfigsHandler implements IBeanHandler {
 
     private void doRegisterTaskConfig(String group, TaskConfig[] taskConfigs) throws InstantiationException, IllegalAccessException {
         for (TaskConfig taskConfig : taskConfigs) {
-            ((DefaultTaskConfigLoader) owner.getConfig().getTaskConfigLoader()).addTaskConfig(DefaultTaskConfig.create(group, taskConfig));
+            ((DefaultTaskConfigLoader) owner.getConfig().getTaskConfigLoader()).addTaskConfig(DefaultTaskConfig.create(owner, group, taskConfig));
         }
     }
 

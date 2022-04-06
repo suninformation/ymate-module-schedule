@@ -37,6 +37,7 @@ public interface IScheduleTask extends Job {
      * 执行计划任务
      *
      * @param context 任务执行上下文环境对象
+     * @throws TaskExecutionException 可能产生的任务执行异常
      */
-    void execute(ITaskExecutionContext context);
+    void execute(ITaskExecutionContext context) throws TaskExecutionException;
 }

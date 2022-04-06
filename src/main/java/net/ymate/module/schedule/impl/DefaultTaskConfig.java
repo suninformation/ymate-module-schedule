@@ -15,6 +15,7 @@
  */
 package net.ymate.module.schedule.impl;
 
+import net.ymate.module.schedule.IScheduler;
 import net.ymate.module.schedule.ITaskConfig;
 import net.ymate.module.schedule.annotation.TaskConfig;
 import net.ymate.platform.commons.util.UUIDUtils;
@@ -54,11 +55,11 @@ public final class DefaultTaskConfig implements ITaskConfig {
         return configBuilder;
     }
 
-    public static DefaultTaskConfig create(TaskConfig taskConfig) throws IllegalAccessException, InstantiationException {
-        return create(null, taskConfig);
+    public static DefaultTaskConfig create(IScheduler owner, TaskConfig taskConfig) throws IllegalAccessException, InstantiationException {
+        return create(owner, null, taskConfig);
     }
 
-    public static DefaultTaskConfig create(String group, TaskConfig taskConfig) throws IllegalAccessException, InstantiationException {
+    public static DefaultTaskConfig create(IScheduler owner, String group, TaskConfig taskConfig) throws IllegalAccessException, InstantiationException {
         Builder configBuilder = builder()
                 .id(taskConfig.id())
                 .name(taskConfig.name())
@@ -69,10 +70,29 @@ public final class DefaultTaskConfig implements ITaskConfig {
         for (Class<? extends JobListener> listenerClass : taskConfig.listeners()) {
             configBuilder.addListener(listenerClass.newInstance());
         }
-        Arrays.stream(taskConfig.params())
-                .map(param -> StringUtils.split(param, "="))
-                .filter(kValue -> kValue != null && kValue.length == 2)
-                .forEachOrdered(kValue -> configBuilder.addParam(kValue[0], kValue[1]));
+        for (String param : taskConfig.params()) {
+            String[] kValue = StringUtils.split(param, "=");
+            if (kValue != null && kValue.length > 0) {
+                String key = null;
+                String value = null;
+                if (kValue.length == 2) {
+                    key = StringUtils.trimToNull(kValue[0]);
+                    value = StringUtils.trimToNull(kValue[1]);
+                    if (value != null && value.length() > 1 && value.charAt(0) == '$') {
+                        value = StringUtils.trimToNull(owner.getOwner().getParam(value.substring(1)));
+                    }
+                } else if (kValue.length == 1) {
+                    boolean flag = kValue[0].length() > 1 && kValue[0].charAt(0) == '$';
+                    if (flag) {
+                        key = StringUtils.trimToNull(kValue[0].substring(1));
+                        value = StringUtils.trimToNull(owner.getOwner().getParam(key));
+                    }
+                }
+                if (key != null && value != null) {
+                    configBuilder.addParam(key, value);
+                }
+            }
+        }
         return configBuilder.build();
     }
 

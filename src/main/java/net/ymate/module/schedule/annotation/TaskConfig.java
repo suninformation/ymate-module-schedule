@@ -32,7 +32,7 @@ import java.lang.annotation.RetentionPolicy;
 public @interface TaskConfig {
 
     /**
-     * @return 任务唯一标识, 若未提供则采用UUID自动生成
+     * @return 任务唯一标识, 若未提供则采用UUID自动生成(注: 若任务唯标识重复则后则将覆盖前者)
      */
     String id() default StringUtils.EMPTY;
 
@@ -52,7 +52,7 @@ public @interface TaskConfig {
     Class<? extends JobListener>[] listeners() default {};
 
     /**
-     * @return 任务扩展参数
+     * @return 任务扩展参数, 采用key=value格式(支持以$xxx格式从框架全局参数中获取xxx的值, 例: key1=$value1 或 $key1)
      */
     String[] params() default {};
 }
