@@ -94,11 +94,6 @@ public final class QuartzScheduleHelper {
                     .withIdentity(triggerKey.getName(), triggerKey.getGroup())
                     .setJobData(doBuildDataMap(config)).build(), trigger);
             //
-            if (config.getJobListeners() != null) {
-                for (JobListener listener : config.getJobListeners()) {
-                    scheduler.getListenerManager().addJobListener(listener);
-                }
-            }
             if (LOG.isDebugEnabled()) {
                 LOG.debug(String.format("Add task %s.%s (%s) - %s with cron: %s", triggerKey.getGroup(), triggerKey.getName(), config.getName(), taskClass.getName(), config.getCron()));
             }

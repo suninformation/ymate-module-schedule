@@ -20,6 +20,9 @@ import net.ymate.module.schedule.support.QuartzScheduleHelper;
 import net.ymate.platform.commons.util.RuntimeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.JobListener;
 import org.quartz.impl.StdSchedulerFactory;
 
 import java.util.List;
@@ -45,6 +48,38 @@ public class DefaultScheduleProvider implements IScheduleProvider {
         if (!initialized) {
             this.owner = owner;
             this.quartzScheduleHelper = QuartzScheduleHelper.bind(owner, StdSchedulerFactory.getDefaultScheduler());
+            this.quartzScheduleHelper.getScheduler().getListenerManager().addJobListener(new JobListener() {
+                @Override
+                public String getName() {
+                    return "DefaultScheduleJobListener";
+                }
+
+                @Override
+                public void jobToBeExecuted(JobExecutionContext context) {
+                    owner.getOwner()
+                            .getEvents()
+                            .fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_TO_BE_EXECUTED)
+                                    .setEventSource(DefaultTaskExecutionContext.contextWrap(context)));
+                }
+
+                @Override
+                public void jobExecutionVetoed(JobExecutionContext context) {
+                    owner.getOwner()
+                            .getEvents()
+                            .fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_EXECUTION_VETOED)
+                                    .setEventSource(DefaultTaskExecutionContext.contextWrap(context)));
+                }
+
+                @Override
+                public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
+                    ScheduleEvent scheduleEvent = new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_WAS_EXECUTED);
+                    scheduleEvent.setEventSource(DefaultTaskExecutionContext.contextWrap(context));
+                    if (jobException != null) {
+                        scheduleEvent.addParamExtend("taskException", jobException);
+                    }
+                    owner.getOwner().getEvents().fireEvent(scheduleEvent);
+                }
+            });
             this.initialized = true;
         }
     }
@@ -56,6 +91,10 @@ public class DefaultScheduleProvider implements IScheduleProvider {
 
     public IScheduler getOwner() {
         return owner;
+    }
+
+    public QuartzScheduleHelper getQuartzScheduleHelper() {
+        return quartzScheduleHelper;
     }
 
     @Override

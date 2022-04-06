@@ -16,13 +16,10 @@
 package net.ymate.module.schedule;
 
 import net.ymate.module.schedule.impl.DefaultTaskExecutionContext;
-import net.ymate.platform.commons.util.ClassUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2017/12/04 15:23
@@ -30,29 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 public abstract class AbstractScheduleTask implements IScheduleTask {
 
     private static final Log LOG = LogFactory.getLog(AbstractScheduleTask.class);
-
-    private static final Class<? extends ITaskExecutionContext> executionContextClass;
-
-    static {
-        Class<? extends ITaskExecutionContext> contextWrapClass;
-        try {
-            contextWrapClass = ClassUtils.getExtensionLoader(ITaskExecutionContext.class).getExtensionClass();
-            if (contextWrapClass == null) {
-                contextWrapClass = DefaultTaskExecutionContext.class;
-            }
-        } catch (Exception e) {
-            contextWrapClass = DefaultTaskExecutionContext.class;
-        }
-        executionContextClass = contextWrapClass;
-    }
-
-    protected static ITaskExecutionContext contextWrap(JobExecutionContext context) {
-        try {
-            return executionContextClass.getConstructor(JobExecutionContext.class).newInstance(context);
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            return new DefaultTaskExecutionContext(context);
-        }
-    }
 
     private final IScheduleLocker scheduleLocker;
 
@@ -81,7 +55,7 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        ITaskExecutionContext executionContext = contextWrap(context);
+        ITaskExecutionContext executionContext = DefaultTaskExecutionContext.contextWrap(context);
         if (sync) {
             if (scheduleLocker.tryLock()) {
                 try {

@@ -43,7 +43,22 @@ public class ScheduleEvent extends AbstractEventContext<IScheduler, ScheduleEven
         /**
          * 调度服务停止事件
          */
-        SCHEDULE_SHUTDOWN
+        SCHEDULE_SHUTDOWN,
+
+        /**
+         * 即将执行任务事件
+         */
+        TASK_TO_BE_EXECUTED,
+
+        /**
+         * 任务执行被否决事件
+         */
+        TASK_EXECUTION_VETOED,
+
+        /**
+         * 任务被执行事件
+         */
+        TASK_WAS_EXECUTED
     }
 
     public ScheduleEvent(IScheduler owner, ScheduleEvent.EVENT eventName) {

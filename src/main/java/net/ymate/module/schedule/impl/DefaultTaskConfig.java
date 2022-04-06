@@ -46,29 +46,25 @@ public final class DefaultTaskConfig implements ITaskConfig {
     }
 
     public static Builder duplicate(ITaskConfig taskConfig) {
-        Builder configBuilder = builder().id(taskConfig.getId())
+        return builder()
+                .id(taskConfig.getId())
                 .name(taskConfig.getName())
                 .cron(taskConfig.getCron())
                 .group(taskConfig.getGroup())
                 .addParams(taskConfig.getParams());
-        taskConfig.getJobListeners().forEach(configBuilder::addListener);
-        return configBuilder;
     }
 
-    public static DefaultTaskConfig create(IScheduler owner, TaskConfig taskConfig) throws IllegalAccessException, InstantiationException {
+    public static DefaultTaskConfig create(IScheduler owner, TaskConfig taskConfig) {
         return create(owner, null, taskConfig);
     }
 
-    public static DefaultTaskConfig create(IScheduler owner, String group, TaskConfig taskConfig) throws IllegalAccessException, InstantiationException {
+    public static DefaultTaskConfig create(IScheduler owner, String group, TaskConfig taskConfig) {
         Builder configBuilder = builder()
                 .id(taskConfig.id())
                 .name(taskConfig.name())
                 .cron(taskConfig.cron());
         if (StringUtils.isNotBlank(group)) {
             configBuilder.group(group);
-        }
-        for (Class<? extends JobListener> listenerClass : taskConfig.listeners()) {
-            configBuilder.addListener(listenerClass.newInstance());
         }
         for (String param : taskConfig.params()) {
             String[] kValue = StringUtils.split(param, "=");
@@ -136,15 +132,6 @@ public final class DefaultTaskConfig implements ITaskConfig {
     }
 
     @Override
-    public List<JobListener> getJobListeners() {
-        return Collections.unmodifiableList(listeners);
-    }
-
-    public void addListener(JobListener listener) {
-        this.listeners.add(listener);
-    }
-
-    @Override
     public Map<String, String> getParams() {
         return Collections.unmodifiableMap(params);
     }
@@ -177,13 +164,6 @@ public final class DefaultTaskConfig implements ITaskConfig {
 
         public Builder cron(String cron) {
             config.setCron(cron);
-            return this;
-        }
-
-        public Builder addListener(JobListener... listeners) {
-            if (listeners != null && listeners.length > 0) {
-                Arrays.stream(listeners).forEach(config::addListener);
-            }
             return this;
         }
 

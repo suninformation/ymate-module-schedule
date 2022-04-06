@@ -16,9 +16,7 @@
 package net.ymate.module.schedule;
 
 import net.ymate.platform.core.beans.annotation.Ignored;
-import org.quartz.JobListener;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,13 +58,6 @@ public interface ITaskConfig {
      * @return 返回任务执行规则表达式
      */
     String getCron();
-
-    /**
-     * 获取任务监听器集合
-     *
-     * @return 返回任务监听器集合
-     */
-    List<JobListener> getJobListeners();
 
     /**
      * 获取任务扩展参数

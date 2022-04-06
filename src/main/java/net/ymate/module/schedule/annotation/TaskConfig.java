@@ -16,7 +16,6 @@
 package net.ymate.module.schedule.annotation;
 
 import org.apache.commons.lang3.StringUtils;
-import org.quartz.JobListener;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Repeatable;
@@ -45,11 +44,6 @@ public @interface TaskConfig {
      * @return 任务执行规则表达式
      */
     String cron();
-
-    /**
-     * @return 任务监听器集合
-     */
-    Class<? extends JobListener>[] listeners() default {};
 
     /**
      * @return 任务扩展参数, 采用key=value格式(支持以$xxx格式从框架全局参数中获取xxx的值, 例: key1=$value1 或 $key1)

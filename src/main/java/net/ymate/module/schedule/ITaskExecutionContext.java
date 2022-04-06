@@ -15,6 +15,7 @@
  */
 package net.ymate.module.schedule;
 
+import net.ymate.platform.commons.lang.BlurObject;
 import net.ymate.platform.core.beans.annotation.Ignored;
 import org.quartz.JobExecutionContext;
 
@@ -71,6 +72,14 @@ public interface ITaskExecutionContext extends Serializable {
      * @return 返回参数对象值
      */
     Object getParamObject(String key);
+
+    /**
+     * 获取指定参数key的值并采用模糊对象包装
+     *
+     * @param key 键名
+     * @return 返回参数值模糊对象
+     */
+    BlurObject getParamBlurObject(String key);
 
     /**
      * 获取Quartz任务执行上下文环境对象

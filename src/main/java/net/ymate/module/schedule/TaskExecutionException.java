@@ -17,7 +17,7 @@ package net.ymate.module.schedule;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2022/4/6 22:48
- * @since 1.0.0
+ * @since 1.0.1
  */
 public class TaskExecutionException extends SchedulerException {
 

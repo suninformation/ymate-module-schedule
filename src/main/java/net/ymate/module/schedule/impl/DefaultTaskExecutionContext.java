@@ -18,14 +18,41 @@ package net.ymate.module.schedule.impl;
 import net.ymate.module.schedule.IScheduler;
 import net.ymate.module.schedule.ITaskExecutionContext;
 import net.ymate.module.schedule.support.QuartzScheduleHelper;
+import net.ymate.platform.commons.lang.BlurObject;
+import net.ymate.platform.commons.util.ClassUtils;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.TriggerKey;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2018/05/11 16:58
  */
 public class DefaultTaskExecutionContext implements ITaskExecutionContext {
+
+    private static final Class<? extends ITaskExecutionContext> executionContextClass;
+
+    static {
+        Class<? extends ITaskExecutionContext> contextWrapClass;
+        try {
+            contextWrapClass = ClassUtils.getExtensionLoader(ITaskExecutionContext.class).getExtensionClass();
+            if (contextWrapClass == null) {
+                contextWrapClass = DefaultTaskExecutionContext.class;
+            }
+        } catch (Exception e) {
+            contextWrapClass = DefaultTaskExecutionContext.class;
+        }
+        executionContextClass = contextWrapClass;
+    }
+
+    public static ITaskExecutionContext contextWrap(JobExecutionContext context) {
+        try {
+            return executionContextClass.getConstructor(JobExecutionContext.class).newInstance(context);
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            return new DefaultTaskExecutionContext(context);
+        }
+    }
 
     private final String id;
 
@@ -79,6 +106,11 @@ public class DefaultTaskExecutionContext implements ITaskExecutionContext {
     @Override
     public Object getParamObject(String key) {
         return detailJobDataMap.get(key);
+    }
+
+    @Override
+    public BlurObject getParamBlurObject(String key) {
+        return BlurObject.bind(detailJobDataMap.get(key));
     }
 
     @Override

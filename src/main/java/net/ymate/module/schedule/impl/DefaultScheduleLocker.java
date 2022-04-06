@@ -18,7 +18,6 @@ package net.ymate.module.schedule.impl;
 import net.ymate.module.schedule.IScheduleLocker;
 import net.ymate.module.schedule.SchedulerException;
 import net.ymate.platform.commons.ReentrantLockHelper;
-import net.ymate.platform.commons.util.RuntimeUtils;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.commons.lang3.StringUtils;
 
