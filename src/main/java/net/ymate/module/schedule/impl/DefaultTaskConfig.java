@@ -20,9 +20,10 @@ import net.ymate.module.schedule.ITaskConfig;
 import net.ymate.module.schedule.annotation.TaskConfig;
 import net.ymate.platform.commons.util.UUIDUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.quartz.JobListener;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2017/12/06 01:14
@@ -36,8 +37,6 @@ public final class DefaultTaskConfig implements ITaskConfig {
     private String group;
 
     private String cron;
-
-    private final List<JobListener> listeners = new ArrayList<>();
 
     private final Map<String, String> params = new HashMap<>();
 

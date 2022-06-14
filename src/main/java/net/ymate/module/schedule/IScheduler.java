@@ -49,4 +49,6 @@ public interface IScheduler extends IInitialization<IApplication>, IDestroyable 
      * @throws Exception 可能产生的异常
      */
     void registerTask(Class<? extends IScheduleTask> targetClass) throws Exception;
+
+    // TODO 支持直接执行临时任务等操作
 }

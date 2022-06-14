@@ -19,15 +19,13 @@ import net.ymate.platform.commons.lang.BlurObject;
 import net.ymate.platform.core.beans.annotation.Ignored;
 import org.quartz.JobExecutionContext;
 
-import java.io.Serializable;
-
 /**
  * 任务执行上下文环境对象
  *
  * @author 刘镇 (suninformation@163.com) on 2018/05/11 04:31
  */
 @Ignored
-public interface ITaskExecutionContext extends Serializable {
+public interface ITaskExecutionContext {
 
     /**
      * 获取当前计划任务ID

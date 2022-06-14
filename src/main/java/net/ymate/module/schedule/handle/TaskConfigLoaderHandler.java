@@ -34,10 +34,11 @@ public class TaskConfigLoaderHandler implements IBeanHandler {
 
     @Override
     public Object handle(Class<?> targetClass) throws Exception {
-        if (ClassUtils.isNormalClass(targetClass) && !targetClass.isInterface() && ClassUtils.isInterfaceOf(targetClass, ITaskConfigLoader.class)) {
-            if (owner.getConfig().getTaskConfigLoader() instanceof DefaultTaskConfigLoader) {
-                ((DefaultTaskConfigLoader) owner.getConfig().getTaskConfigLoader()).addTaskConfigs((ITaskConfigLoader) targetClass.newInstance());
-            }
+        if (ClassUtils.isNormalClass(targetClass)
+                && !targetClass.isInterface()
+                && ClassUtils.isInterfaceOf(targetClass, ITaskConfigLoader.class)
+                && owner.getConfig().getTaskConfigLoader() instanceof DefaultTaskConfigLoader) {
+            ((DefaultTaskConfigLoader) owner.getConfig().getTaskConfigLoader()).addTaskConfigs((ITaskConfigLoader) targetClass.newInstance());
         }
         return null;
     }

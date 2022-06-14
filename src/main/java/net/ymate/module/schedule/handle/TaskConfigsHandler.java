@@ -24,6 +24,8 @@ import net.ymate.module.schedule.impl.DefaultTaskConfigLoader;
 import net.ymate.platform.commons.util.ClassUtils;
 import net.ymate.platform.core.beans.IBeanHandler;
 
+import java.util.Arrays;
+
 /**
  * @author 刘镇 (suninformation@163.com) on 2020/01/12 18:36
  */
@@ -35,7 +37,7 @@ public class TaskConfigsHandler implements IBeanHandler {
         this.owner = owner;
     }
 
-    private void doRegisterTaskConfig(String group, TaskConfig[] taskConfigs) throws InstantiationException, IllegalAccessException {
+    private void doRegisterTaskConfig(String group, TaskConfig[] taskConfigs) {
         for (TaskConfig taskConfig : taskConfigs) {
             ((DefaultTaskConfigLoader) owner.getConfig().getTaskConfigLoader()).addTaskConfig(DefaultTaskConfig.create(owner, group, taskConfig));
         }
@@ -46,9 +48,8 @@ public class TaskConfigsHandler implements IBeanHandler {
         if (owner.getConfig().getTaskConfigLoader() instanceof DefaultTaskConfigLoader && ClassUtils.isNormalClass(targetClass)) {
             TaskConfigGroups taskConfigGroups = targetClass.getAnnotation(TaskConfigGroups.class);
             if (taskConfigGroups != null) {
-                for (TaskConfigs taskConfigs : taskConfigGroups.value()) {
-                    doRegisterTaskConfig(taskConfigs.group(), taskConfigs.value());
-                }
+                Arrays.stream(taskConfigGroups.value())
+                        .forEach(taskConfigs -> doRegisterTaskConfig(taskConfigs.group(), taskConfigs.value()));
             } else {
                 TaskConfigs taskConfigs = targetClass.getAnnotation(TaskConfigs.class);
                 if (taskConfigs != null) {

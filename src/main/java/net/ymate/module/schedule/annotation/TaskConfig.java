@@ -31,7 +31,7 @@ import java.lang.annotation.RetentionPolicy;
 public @interface TaskConfig {
 
     /**
-     * @return 任务唯一标识, 若未提供则采用UUID自动生成(注: 若任务唯标识重复则后则将覆盖前者)
+     * @return 任务唯一标识, 若未提供则采用UUID自动生成(注: 若任务唯标识重复则后者将覆盖前者)
      */
     String id() default StringUtils.EMPTY;
 
