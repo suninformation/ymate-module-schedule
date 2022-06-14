@@ -28,8 +28,6 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
 
     private static final Log LOG = LogFactory.getLog(AbstractScheduleTask.class);
 
-    private final IScheduleLocker scheduleLocker;
-
     private final boolean sync;
 
     public AbstractScheduleTask() {
@@ -38,14 +36,6 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
 
     public AbstractScheduleTask(boolean sync) {
         this.sync = sync;
-        if (this.sync) {
-            scheduleLocker = Scheduler.get().getConfig().getScheduleLockerFactory().getScheduleLocker(getClass().getName());
-            if (scheduleLocker == null) {
-                throw new IllegalStateException(String.format("Can not create schedule locker for %s", getClass().getName()));
-            }
-        } else {
-            scheduleLocker = null;
-        }
     }
 
     @Override
@@ -57,6 +47,13 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
     public void execute(JobExecutionContext context) throws JobExecutionException {
         ITaskExecutionContext executionContext = DefaultTaskExecutionContext.contextWrap(context);
         if (sync) {
+            IScheduleLocker scheduleLocker = executionContext.getOwner()
+                    .getConfig()
+                    .getScheduleLockerFactory()
+                    .getScheduleLocker(getClass().getName());
+            if (scheduleLocker == null) {
+                throw new JobExecutionException(String.format("Can not create schedule locker for %s", getClass().getName()));
+            }
             if (scheduleLocker.tryLock()) {
                 try {
                     execute(executionContext);
