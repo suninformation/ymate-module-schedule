@@ -16,7 +16,6 @@
 package net.ymate.module.schedule.support;
 
 import net.ymate.module.schedule.IScheduleTask;
-import net.ymate.module.schedule.IScheduler;
 import net.ymate.module.schedule.ITaskConfig;
 import net.ymate.module.schedule.impl.DefaultTaskConfig;
 import org.apache.commons.lang.NullArgumentException;
@@ -40,22 +39,16 @@ public final class QuartzScheduleHelper {
 
     public static final String TASK_NAME = "__TASK_NAME";
 
-    private final IScheduler owner;
-
     private final Scheduler scheduler;
 
-    public static QuartzScheduleHelper bind(IScheduler owner, Scheduler scheduler) {
-        return new QuartzScheduleHelper(owner, scheduler);
+    public static QuartzScheduleHelper bind(Scheduler scheduler) {
+        return new QuartzScheduleHelper(scheduler);
     }
 
-    private QuartzScheduleHelper(IScheduler owner, Scheduler scheduler) {
-        if (owner == null) {
-            throw new NullArgumentException("owner");
-        }
+    private QuartzScheduleHelper(Scheduler scheduler) {
         if (scheduler == null) {
             throw new NullArgumentException("scheduler");
         }
-        this.owner = owner;
         this.scheduler = scheduler;
     }
 
@@ -65,7 +58,6 @@ public final class QuartzScheduleHelper {
             dataMap.putAll(config.getParams());
         }
         dataMap.put(TASK_NAME, config.getName());
-        dataMap.put(IScheduler.class.getName(), owner);
         //
         return dataMap;
     }

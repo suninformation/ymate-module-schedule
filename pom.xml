@@ -15,7 +15,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ymate.platform.version>2.1.2</ymate.platform.version>
+        <ymate.platform.version>2.1.3</ymate.platform.version>
     </properties>
 
     <developers>
@@ -180,6 +180,12 @@
             <groupId>net.ymate.platform</groupId>
             <artifactId>ymate-platform-core</artifactId>
             <version>${ymate.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.ymate.platform</groupId>
+            <artifactId>ymate-platform-persistence-jdbc</artifactId>
+            <version>${ymate.platform.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

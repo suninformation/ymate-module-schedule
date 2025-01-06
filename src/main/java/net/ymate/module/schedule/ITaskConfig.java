@@ -32,7 +32,7 @@ public interface ITaskConfig {
     String DISABLED = "disabled";
 
     /**
-     * 获取任务唯一标识, 若未提供则采用UUID自动生成
+     * 获取任务唯一标识, 若未提供则根据名称及参数自动生成
      *
      * @return 返回任务唯一标识
      */

@@ -22,6 +22,7 @@ import net.ymate.platform.commons.lang.BlurObject;
 import net.ymate.platform.commons.util.ClassUtils;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 
 import java.lang.reflect.InvocationTargetException;
@@ -73,7 +74,11 @@ public class DefaultTaskExecutionContext implements ITaskExecutionContext {
         //
         detailJobDataMap = context.getJobDetail().getJobDataMap();
         this.name = detailJobDataMap.getString(QuartzScheduleHelper.TASK_NAME);
-        this.owner = (IScheduler) detailJobDataMap.get(IScheduler.class.getName());
+        try {
+            this.owner = (IScheduler) context.getScheduler().getContext().get(IScheduler.class.getName());
+        } catch (SchedulerException e) {
+            throw new net.ymate.module.schedule.SchedulerException(e.getMessage(), e);
+        }
         //
         this.context = context;
     }

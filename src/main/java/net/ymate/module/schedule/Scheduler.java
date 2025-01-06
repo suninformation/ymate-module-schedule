@@ -131,9 +131,9 @@ public final class Scheduler implements IModule, IScheduler {
 
     @SuppressWarnings("unchecked")
     private void doTasksStartup() {
+        IScheduleProvider provider = config.getScheduleProvider();
         Collection<ITaskConfig> taskConfigs = config.getTaskConfigLoader().loadConfigs();
         if (taskConfigs != null && !taskConfigs.isEmpty()) {
-            boolean flag = false;
             for (ITaskConfig taskConfig : taskConfigs) {
                 Class<? extends IScheduleTask> taskClass = null;
                 ScheduleTaskMeta taskMeta = scheduleTaskMetas.get(taskConfig.getName());
@@ -150,34 +150,23 @@ public final class Scheduler implements IModule, IScheduler {
                 }
                 if (taskClass != null) {
                     try {
-                        if (config.getScheduleProvider().addTask(taskConfig, taskClass)) {
-                            flag = true;
-                            if (owner.isDevEnv() && LOG.isDebugEnabled()) {
-                                LOG.debug(String.format("Added task %s.%s_%s[cron=%s, params=%s].", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getName(), taskConfig.getId(), taskConfig.getCron(), taskConfig.getParams()));
-                            }
-                        }
+                        provider.addOrUpdateTask(taskConfig, taskClass);
                     } catch (SchedulerException e) {
                         if (LOG.isWarnEnabled()) {
-                            LOG.warn(String.format("An exception occurred when adding task '%s.%s (%s) - %s':", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getId(), taskConfig.getName(), taskClass.getName()), RuntimeUtils.unwrapThrow(e));
+                            LOG.warn(String.format("An exception occurred when adding or updating task '%s.%s (%s) - %s':", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getId(), taskConfig.getName(), taskClass.getName()), RuntimeUtils.unwrapThrow(e));
                         }
                     }
                 }
             }
-            if (flag) {
-                try {
-                    owner.getEvents().fireEvent(new ScheduleEvent(this, ScheduleEvent.EVENT.SCHEDULE_INITIALIZED));
-                    config.getScheduleProvider().start();
-                    owner.getEvents().fireEvent(new ScheduleEvent(this, ScheduleEvent.EVENT.SCHEDULE_STARTED));
-                } catch (Exception e) {
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error(String.format("An exception occurred while starting the scheduled task service '%s': ", config.getScheduleProvider().getClass().getName()), RuntimeUtils.unwrapThrow(e));
-                    }
-                }
-            } else if (LOG.isInfoEnabled()) {
-                LOG.debug("No task registered, scheduling service not start.");
-            }
         } else if (LOG.isInfoEnabled()) {
-            LOG.info("No task configuration was found, scheduling service not start.");
+            LOG.info("No task configuration was found.");
+        }
+        try {
+            provider.start();
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error(String.format("An exception occurred while starting the scheduled task service '%s': ", provider.getClass().getName()), RuntimeUtils.unwrapThrow(e));
+            }
         }
     }
 

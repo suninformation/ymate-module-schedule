@@ -43,6 +43,36 @@ ymp.configs.module.schedule.task_config_loader_class=
 
 # 当使用默认规则配置加载器时, 用于为指定任务设置调度规则(当值为disabled时将禁用该任务), 此配置优先于注解配置
 ymp.params.module.schedule.task_cron_<TASK_ID>=<TASK_CRON|disabled>
+
+# 设置调度服务使用的数据源名称, 默认值: 空
+ymp.params.module.schedule.dataSourceName=
+
+# 设置调度服务实例名称, 默认值: QuartzScheduler
+ymp.params.module.schedule.org.quartz.scheduler.instanceName=
+
+# 设置调度服务实例唯一标识, 默认值: AUTO
+ymp.params.module.schedule.org.quartz.scheduler.instanceId=
+
+# 设置调度服务是否开启集群模式, 默认值: true
+ymp.params.module.schedule.org.quartz.jobStore.isClustered=
+
+# 设置调度服务群集实例检测频率（单位: 毫秒）, 默认值: 15000
+ymp.params.module.schedule.org.quartz.jobStore.clusterCheckinInterval=
+
+# 设置调度服务每次可以执行的最大超时触发器数量, 默认值: 1
+ymp.params.module.schedule.org.quartz.jobStore.maxMisfiresToHandleAtATime=
+
+# 设置调度服务触发器超时触发的阈值（单位: 毫秒）, 默认值: 12000
+ymp.params.module.schedule.org.quartz.jobStore.misfireThreshold=
+
+# 设置调度服务线程池实现类名称, 默认值: org.quartz.simpl.SimpleThreadPool
+ymp.params.module.schedule.org.quartz.threadPool.class=
+
+# 设置调度服务线程池线程数量, 默认值: 20
+ymp.params.module.schedule.org.quartz.threadPool.threadCount=
+
+# 设置调度服务线程池线程优先级, 默认值: 5
+ymp.params.module.schedule.org.quartz.threadPool.threadPriority=
 ```
 
 
@@ -104,7 +134,7 @@ ymp.params.module.schedule.task_cron_<TASK_ID>=<TASK_CRON|disabled>
 
 | 配置项 | 描述                                                         |
 | ------ | ------------------------------------------------------------ |
-| id     | 任务唯一标识, 若未提供则采用UUID自动生成<br />*注：若任务唯标识重复则后者将覆盖前者* |
+| id     | 任务唯一标识, 若未提供则根据名称及参数自动生成<br />*注：若任务唯标识重复则后者将覆盖前者* |
 | name   | 计划任务名称或类名称                                         |
 | cron   | 任务执行规则表达式                                           |
 | params | 任务扩展参数, 采用 `k=v` 格式并支持以 `$xxx` 格式从框架全局参数中获取 `xxx` 的值<br />例：`key1=$value1`  或 `$key1` |
@@ -121,14 +151,36 @@ ymp.params.module.schedule.task_cron_<TASK_ID>=<TASK_CRON|disabled>
 
 事件枚举对象 `ScheduleEvent` 包括以下事件类型：
 
-| 事务类型              | 说明               |
-| --------------------- | ------------------ |
-| SCHEDULE_INITIALIZED  | 调度服务初始化事件 |
-| SCHEDULE_STARTED      | 调度服务已启动事件 |
-| SCHEDULE_SHUTDOWN     | 调度服务停止事件   |
-| TASK_TO_BE_EXECUTED   | 即将执行任务事件   |
-| TASK_EXECUTION_VETOED | 任务执行被否决事件 |
-| TASK_WAS_EXECUTED     | 任务被执行事件     |
+| 事务类型                  | 说明               |
+| ------------------------- | ------------------ |
+| SCHEDULE_INITIALIZED      | 调度服务初始化事件 |
+| SCHEDULE_STARTING         |                    |
+| SCHEDULE_STARTED          | 调度服务已启动事件 |
+| SCHEDULE_SHUTTING_DOWN    |                    |
+| SCHEDULE_SHUTDOWN         | 调度服务停止事件   |
+| SCHEDULER_ERROR           |                    |
+| SCHEDULER_IN_STANDBY_MODE |                    |
+| SCHEDULING_DATA_CLEARED   |                    |
+| TASK_TO_BE_EXECUTED       | 即将执行任务事件   |
+| TASK_VETO_EXECUTION       |                    |
+| TASK_EXECUTION_VETOED     | 任务执行被否决事件 |
+| TASK_WAS_EXECUTED         | 任务被执行事件     |
+| TASK_SCHEDULED            |                    |
+| TASK_UNSCHEDULED          |                    |
+| TASK_ADDED                |                    |
+| TASK_DELETED              |                    |
+| TASK_PAUSED               |                    |
+| TASK_GROUP_PAUSED         |                    |
+| TASK_RESUMED              |                    |
+| TASK_GROUP_RESUMED        |                    |
+| TRIGGER_FINALIZED         |                    |
+| TRIGGER_PAUSED            |                    |
+| TRIGGER_GROUP_PAUSED      |                    |
+| TRIGGER_RESUMED           |                    |
+| TRIGGER_GROUP_RESUMED     |                    |
+| TRIGGER_FIRED             |                    |
+| TRIGGER_MISFIRED          |                    |
+| TRIGGER_COMPLETE          |                    |
 
 
 

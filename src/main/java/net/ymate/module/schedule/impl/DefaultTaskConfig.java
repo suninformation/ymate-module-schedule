@@ -18,7 +18,7 @@ package net.ymate.module.schedule.impl;
 import net.ymate.module.schedule.IScheduler;
 import net.ymate.module.schedule.ITaskConfig;
 import net.ymate.module.schedule.annotation.TaskConfig;
-import net.ymate.platform.commons.util.UUIDUtils;
+import net.ymate.platform.commons.util.ParamUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
@@ -180,7 +180,8 @@ public final class DefaultTaskConfig implements ITaskConfig {
 
         public DefaultTaskConfig build() {
             if (StringUtils.isBlank(config.getId())) {
-                config.setId(UUIDUtils.UUID());
+                // 根据当前任务名称及参数集合进行签名计算
+                config.setId(ParamUtils.createSignature(config.params, false, config.getName()));
             }
             return config;
         }

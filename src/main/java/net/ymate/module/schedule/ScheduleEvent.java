@@ -45,6 +45,20 @@ public class ScheduleEvent extends AbstractEventContext<IScheduler, ScheduleEven
          */
         SCHEDULE_SHUTDOWN,
 
+        // --
+
+        SCHEDULE_STARTING,
+
+        SCHEDULE_SHUTTING_DOWN,
+
+        SCHEDULER_ERROR,
+
+        SCHEDULER_IN_STANDBY_MODE,
+
+        SCHEDULING_DATA_CLEARED,
+
+        // ---
+
         /**
          * 即将执行任务事件
          */
@@ -58,7 +72,45 @@ public class ScheduleEvent extends AbstractEventContext<IScheduler, ScheduleEven
         /**
          * 任务被执行事件
          */
-        TASK_WAS_EXECUTED
+        TASK_WAS_EXECUTED,
+
+        // ---
+
+        TASK_SCHEDULED,
+
+        TASK_UNSCHEDULED,
+
+        TASK_ADDED,
+
+        TASK_DELETED,
+
+        TASK_PAUSED,
+
+        TASK_GROUP_PAUSED,
+
+        TASK_RESUMED,
+
+        TASK_GROUP_RESUMED,
+
+        TRIGGER_FINALIZED,
+
+        TRIGGER_PAUSED,
+
+        TRIGGER_GROUP_PAUSED,
+
+        TRIGGER_RESUMED,
+
+        TRIGGER_GROUP_RESUMED,
+
+        // ---
+
+        TASK_VETO_EXECUTION,
+
+        TRIGGER_FIRED,
+
+        TRIGGER_MISFIRED,
+
+        TRIGGER_COMPLETE
     }
 
     public ScheduleEvent(IScheduler owner, ScheduleEvent.EVENT eventName) {
