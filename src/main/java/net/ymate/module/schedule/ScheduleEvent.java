@@ -17,6 +17,7 @@ package net.ymate.module.schedule;
 
 import net.ymate.platform.core.event.AbstractEventContext;
 import net.ymate.platform.core.event.IEvent;
+import org.quartz.*;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2020/01/17 22:25
@@ -115,5 +116,99 @@ public class ScheduleEvent extends AbstractEventContext<IScheduler, ScheduleEven
 
     public ScheduleEvent(IScheduler owner, ScheduleEvent.EVENT eventName) {
         super(owner, ScheduleEvent.class, eventName);
+    }
+
+    public ITaskExecutionContext getExecutionContext() {
+        return getEventSource();
+    }
+
+    public Trigger getTrigger() {
+        return (Trigger) getParamExtend("trigger");
+    }
+
+    public ScheduleEvent trigger(Trigger trigger) {
+        addParamExtend("trigger", trigger);
+        return this;
+    }
+
+    public TriggerKey getTriggerKey() {
+        return (TriggerKey) getParamExtend("triggerKey");
+    }
+
+    public ScheduleEvent triggerKey(TriggerKey triggerKey) {
+        addParamExtend("triggerKey", triggerKey);
+        return this;
+    }
+
+    public String getTriggerGroup() {
+        return (String) getParamExtend("triggerGroup");
+    }
+
+    public ScheduleEvent triggerGroup(String triggerGroup) {
+        addParamExtend("triggerGroup", triggerGroup);
+        return this;
+    }
+
+    public Trigger.CompletedExecutionInstruction getTriggerInstructionCode() {
+        return (Trigger.CompletedExecutionInstruction) getParamExtend("triggerInstructionCode");
+    }
+
+    public ScheduleEvent triggerInstructionCode(Trigger.CompletedExecutionInstruction triggerInstructionCode) {
+        addParamExtend("triggerInstructionCode", triggerInstructionCode);
+        return this;
+    }
+
+    public JobKey getJobKey() {
+        return (JobKey) getParamExtend("jobKey");
+    }
+
+    public ScheduleEvent jobKey(JobKey jobKey) {
+        addParamExtend("jobKey", jobKey);
+        return this;
+    }
+
+    public String getJobGroup() {
+        return (String) getParamExtend("jobGroup");
+    }
+
+    public ScheduleEvent jobGroup(String jobGroup) {
+        addParamExtend("jobGroup", jobGroup);
+        return this;
+    }
+
+    public JobDetail getJobDetail() {
+        return (JobDetail) getParamExtend("jobDetail");
+    }
+
+    public ScheduleEvent jobDetail(JobDetail jobDetail) {
+        addParamExtend("jobDetail", jobDetail);
+        return this;
+    }
+
+    public JobExecutionException getJobException() {
+        return (JobExecutionException) getParamExtend("jobException");
+    }
+
+    public ScheduleEvent jobException(JobExecutionException jobException) {
+        addParamExtend("jobException", jobException);
+        return this;
+    }
+
+    public org.quartz.SchedulerException getErrorCause() {
+        return (org.quartz.SchedulerException) getParamExtend("errorCause");
+    }
+
+    public ScheduleEvent errorCause(org.quartz.SchedulerException cause) {
+        addParamExtend("errorCause", cause);
+        return this;
+    }
+
+    public String getErrorMsg() {
+        return (String) getParamExtend("errorMsg");
+    }
+
+    public ScheduleEvent errorMsg(String msg) {
+        addParamExtend("errorMsg", msg);
+        return this;
     }
 }
