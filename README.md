@@ -44,8 +44,15 @@ ymp.configs.module.schedule.task_config_loader_class=
 # 当使用默认规则配置加载器时, 用于为指定任务设置调度规则(当值为disabled时将禁用该任务), 此配置优先于注解配置
 ymp.params.module.schedule.task_cron_<TASK_ID>=<TASK_CRON|disabled>
 
+#-------------------------------------
+# 以下为常规配置，更多配置及参数说明请查看：https://github.com/quartz-scheduler/quartz/blob/main/docs/configuration.adoc
+#-------------------------------------
+
 # 设置调度服务使用的数据源名称, 默认值: 空
 ymp.params.module.schedule.dataSourceName=
+
+# 调度服务配置文件, 默认值: 空
+ymp.params.module.schedule.configFile=
 
 # 设置调度服务实例名称, 默认值: QuartzScheduler
 ymp.params.module.schedule.org.quartz.scheduler.instanceName=

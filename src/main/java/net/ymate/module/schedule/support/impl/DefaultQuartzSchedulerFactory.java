@@ -18,12 +18,18 @@ package net.ymate.module.schedule.support.impl;
 import net.ymate.module.schedule.IScheduler;
 import net.ymate.module.schedule.support.IQuartzSchedulerFactory;
 import net.ymate.module.schedule.support.QuartzSchedulerJobStore;
+import net.ymate.platform.commons.util.RuntimeUtils;
 import net.ymate.platform.core.configuration.IConfigReader;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.quartz.Scheduler;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.simpl.SimpleThreadPool;
 
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Properties;
 
@@ -32,6 +38,8 @@ import java.util.Properties;
  * @since 1.0.2
  */
 public class DefaultQuartzSchedulerFactory implements IQuartzSchedulerFactory {
+
+    private static final Log LOG = LogFactory.getLog(DefaultQuartzSchedulerFactory.class);
 
     private IScheduler owner;
 
@@ -49,7 +57,19 @@ public class DefaultQuartzSchedulerFactory implements IQuartzSchedulerFactory {
             IConfigReader configReader = owner.getOwner().getParamConfigReader();
             Map<String, String> propMap = configReader.getMap(IScheduler.MODULE_NAME + ".");
             String dataSourceName = propMap.remove(QuartzSchedulerJobStore.DATA_SOURCE_NAME);
-            if (!propMap.isEmpty()) {
+            String filePath = RuntimeUtils.replaceEnvVariable(propMap.remove("configFile"));
+            if (StringUtils.isNotBlank(filePath)) {
+                File configFile = new File(filePath);
+                if (configFile.exists() && configFile.isAbsolute() && !configFile.isDirectory()) {
+                    try (InputStream inputStream = Files.newInputStream(configFile.toPath())) {
+                        properties.load(inputStream);
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info(String.format("Found and load the config file: %s", configFile.toURI().toURL()));
+                        }
+                    }
+                }
+            }
+            if (properties.isEmpty() && !propMap.isEmpty()) {
                 for (Map.Entry<String, String> entry : propMap.entrySet()) {
                     if (StringUtils.startsWith(entry.getKey(), "org.quartz.") && StringUtils.isNotBlank(entry.getValue())) {
                         if (!StringUtils.startsWith(entry.getKey(), StdSchedulerFactory.PROP_DATASOURCE_PREFIX)) {
@@ -74,6 +94,7 @@ public class DefaultQuartzSchedulerFactory implements IQuartzSchedulerFactory {
             if (StringUtils.isNotBlank(dataSourceName)) {
                 properties.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, QuartzSchedulerJobStore.class.getName());
             }
+            properties.put("org.quartz.scheduler.skipUpdateCheck", "true");
             //
             StdSchedulerFactory schedulerFactory = new StdSchedulerFactory(properties);
             this.scheduler = schedulerFactory.getScheduler();
