@@ -317,6 +317,40 @@ public final class QuartzScheduleHelper {
         }
     }
 
+    /**
+     * 中断任务
+     *
+     * @param id 任务ID
+     * @throws SchedulerException 可能产生的任务调度异常
+     */
+    public void interruptTask(String id) throws SchedulerException {
+        interruptTask(id, null);
+    }
+
+    public void interruptTask(String id, String group) throws SchedulerException {
+        JobKey jobKey = getJobKey(id, group);
+        if (jobKey != null) {
+            this.scheduler.interrupt(jobKey);
+            //
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Interrupt task %s.%s", jobKey.getGroup(), jobKey.getName()));
+            }
+        }
+    }
+
+    /**
+     * 中断所有计划任务
+     *
+     * @throws SchedulerException 可能产生的调度异常
+     */
+    public void interruptAll() throws SchedulerException {
+        this.scheduler.interrupt(this.scheduler.getSchedulerInstanceId());
+        //
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Interrupt all tasks");
+        }
+    }
+
     public void shutdown(boolean waitForJobsToComplete) throws SchedulerException {
         this.scheduler.shutdown(waitForJobsToComplete);
     }

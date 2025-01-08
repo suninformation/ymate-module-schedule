@@ -211,4 +211,21 @@ public interface IScheduleProvider extends IInitialization<IScheduler>, IDestroy
      * @throws SchedulerException 可能产生的任务调度异常
      */
     void resumeAll() throws SchedulerException;
+
+    /**
+     * 中断任务
+     *
+     * @param id 任务ID
+     * @throws SchedulerException 可能产生的任务调度异常
+     */
+    void interruptTask(String id) throws SchedulerException;
+
+    void interruptTask(String id, String group) throws SchedulerException;
+
+    /**
+     * 中断所有计划任务
+     *
+     * @throws SchedulerException 可能产生的调度异常
+     */
+    void interruptAll() throws SchedulerException;
 }

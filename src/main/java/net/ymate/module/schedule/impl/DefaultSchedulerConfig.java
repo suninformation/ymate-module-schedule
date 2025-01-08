@@ -81,7 +81,6 @@ public final class DefaultSchedulerConfig implements ISchedulerConfig {
                 if (scheduleProvider == null) {
                     scheduleProvider = ClassUtils.loadClass(IScheduleProvider.class, DefaultScheduleProvider.class);
                 }
-                scheduleProvider.initialize(owner);
                 //
                 if (taskConfigLoader == null) {
                     taskConfigLoader = ClassUtils.loadClass(ITaskConfigLoader.class, DefaultTaskConfigLoader.class);

@@ -18,8 +18,10 @@ package net.ymate.module.schedule;
 import net.ymate.module.schedule.impl.DefaultTaskExecutionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.UnableToInterruptJobException;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2017/12/04 15:23
@@ -34,6 +36,9 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
         this(false);
     }
 
+    /**
+     * @see DisallowConcurrentExecution
+     */
     public AbstractScheduleTask(boolean sync) {
         this.sync = sync;
     }
@@ -74,5 +79,9 @@ public abstract class AbstractScheduleTask implements IScheduleTask {
                 throw new JobExecutionException(e.getMessage(), e);
             }
         }
+    }
+
+    @Override
+    public void interrupt() throws UnableToInterruptJobException {
     }
 }

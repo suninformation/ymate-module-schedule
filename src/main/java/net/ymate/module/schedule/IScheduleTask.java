@@ -16,7 +16,8 @@
 package net.ymate.module.schedule;
 
 import net.ymate.platform.core.beans.annotation.Ignored;
-import org.quartz.Job;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.InterruptableJob;
 
 /**
  * 计划任务接口
@@ -24,12 +25,13 @@ import org.quartz.Job;
  * @author 刘镇 (suninformation@163.com) on 2016/05/06 03:09
  */
 @Ignored
-public interface IScheduleTask extends Job {
+public interface IScheduleTask extends InterruptableJob {
 
     /**
      * 是否采用同步执行(相同的计划任务同一时间仅能有一个实例正在执行)
      *
      * @return 返回true表示同步执行
+     * @see DisallowConcurrentExecution
      */
     boolean isSync();
 

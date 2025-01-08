@@ -132,36 +132,38 @@ public final class Scheduler implements IModule, IScheduler {
     @SuppressWarnings("unchecked")
     private void doTasksStartup() {
         IScheduleProvider provider = config.getScheduleProvider();
-        Collection<ITaskConfig> taskConfigs = config.getTaskConfigLoader().loadConfigs();
-        if (taskConfigs != null && !taskConfigs.isEmpty()) {
-            for (ITaskConfig taskConfig : taskConfigs) {
-                Class<? extends IScheduleTask> taskClass = null;
-                ScheduleTaskMeta taskMeta = scheduleTaskMetas.get(taskConfig.getName());
-                if (taskMeta != null) {
-                    taskClass = taskMeta.getTaskClass();
-                } else {
-                    try {
-                        taskClass = (Class<? extends IScheduleTask>) ClassUtils.loadClass(taskConfig.getName(), getClass());
-                    } catch (ClassNotFoundException e) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn(String.format("Task '%s' could not be found, load failed.", taskConfig.getName()));
-                        }
-                    }
-                }
-                if (taskClass != null) {
-                    try {
-                        provider.addOrUpdateTask(taskConfig, taskClass);
-                    } catch (SchedulerException e) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn(String.format("An exception occurred when adding or updating task '%s.%s (%s) - %s':", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getId(), taskConfig.getName(), taskClass.getName()), RuntimeUtils.unwrapThrow(e));
-                        }
-                    }
-                }
-            }
-        } else if (LOG.isInfoEnabled()) {
-            LOG.info("No task configuration was found.");
-        }
         try {
+            provider.initialize(this);
+            Collection<ITaskConfig> taskConfigs = config.getTaskConfigLoader().loadConfigs();
+            if (taskConfigs != null && !taskConfigs.isEmpty()) {
+                for (ITaskConfig taskConfig : taskConfigs) {
+                    Class<? extends IScheduleTask> taskClass = null;
+                    ScheduleTaskMeta taskMeta = scheduleTaskMetas.get(taskConfig.getName());
+                    if (taskMeta != null) {
+                        taskClass = taskMeta.getTaskClass();
+                    } else {
+                        try {
+                            taskClass = (Class<? extends IScheduleTask>) ClassUtils.loadClass(taskConfig.getName(), getClass());
+                        } catch (ClassNotFoundException e) {
+                            if (LOG.isWarnEnabled()) {
+                                LOG.warn(String.format("Task '%s' could not be found, load failed.", taskConfig.getName()));
+                            }
+                        }
+                    }
+                    if (taskClass != null) {
+                        try {
+                            provider.addOrUpdateTask(taskConfig, taskClass);
+                        } catch (SchedulerException e) {
+                            if (LOG.isWarnEnabled()) {
+                                LOG.warn(String.format("An exception occurred when adding or updating task '%s.%s (%s) - %s':", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getId(), taskConfig.getName(), taskClass.getName()), RuntimeUtils.unwrapThrow(e));
+                            }
+                        }
+                    }
+                }
+            } else if (LOG.isInfoEnabled()) {
+                LOG.info("No task configuration was found.");
+            }
+            //
             provider.start();
         } catch (Exception e) {
             if (LOG.isErrorEnabled()) {
@@ -178,8 +180,6 @@ public final class Scheduler implements IModule, IScheduler {
     @Override
     public void close() throws Exception {
         if (initialized) {
-            owner.getEvents().fireEvent(new ScheduleEvent(this, ScheduleEvent.EVENT.SCHEDULE_SHUTDOWN));
-            //
             initialized = false;
             //
             if (config.isEnabled()) {

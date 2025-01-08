@@ -54,13 +54,14 @@ public class DefaultScheduleProvider implements IScheduleProvider, SchedulerList
             //
             Scheduler scheduler = schedulerFactory.getScheduler();
             ListenerManager listenerManager = scheduler.getListenerManager();
+            listenerManager.addSchedulerListener(this);
             listenerManager.addJobListener(this);
             listenerManager.addTriggerListener(this);
             scheduler.getContext().put(IScheduler.class.getName(), owner);
             //
-            owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULE_INITIALIZED).setEventSource(scheduler));
             this.scheduleHelper = QuartzScheduleHelper.bind(scheduler);
             this.initialized = true;
+            owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULE_INITIALIZED, this.scheduleHelper).setEventSource(scheduler));
         }
     }
 
@@ -289,6 +290,33 @@ public class DefaultScheduleProvider implements IScheduleProvider, SchedulerList
     }
 
     @Override
+    public void interruptTask(String id) throws SchedulerException {
+        try {
+            scheduleHelper.interruptTask(id);
+        } catch (org.quartz.SchedulerException e) {
+            throw new SchedulerException(e);
+        }
+    }
+
+    @Override
+    public void interruptTask(String id, String group) throws SchedulerException {
+        try {
+            scheduleHelper.interruptTask(id, group);
+        } catch (org.quartz.SchedulerException e) {
+            throw new SchedulerException(e);
+        }
+    }
+
+    @Override
+    public void interruptAll() throws SchedulerException {
+        try {
+            scheduleHelper.interruptAll();
+        } catch (org.quartz.SchedulerException e) {
+            throw new SchedulerException(e);
+        }
+    }
+
+    @Override
     public String getName() {
         return DefaultScheduleProvider.class.getSimpleName();
     }
@@ -297,7 +325,7 @@ public class DefaultScheduleProvider implements IScheduleProvider, SchedulerList
     public void jobToBeExecuted(JobExecutionContext context) {
         owner.getOwner()
                 .getEvents()
-                .fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_TO_BE_EXECUTED)
+                .fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_TO_BE_EXECUTED, scheduleHelper)
                         .setEventSource(DefaultTaskExecutionContext.contextWrap(context)));
     }
 
@@ -305,20 +333,20 @@ public class DefaultScheduleProvider implements IScheduleProvider, SchedulerList
     public void jobExecutionVetoed(JobExecutionContext context) {
         owner.getOwner()
                 .getEvents()
-                .fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_EXECUTION_VETOED)
+                .fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_EXECUTION_VETOED, scheduleHelper)
                         .setEventSource(DefaultTaskExecutionContext.contextWrap(context)));
     }
 
     @Override
     public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_WAS_EXECUTED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_WAS_EXECUTED, scheduleHelper)
                 .jobException(jobException)
                 .setEventSource(DefaultTaskExecutionContext.contextWrap(context)));
     }
 
     @Override
     public void triggerFired(Trigger trigger, JobExecutionContext context) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_FIRED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_FIRED, scheduleHelper)
                 .trigger(trigger)
                 .setEventSource(DefaultTaskExecutionContext.contextWrap(context)));
     }
@@ -326,7 +354,7 @@ public class DefaultScheduleProvider implements IScheduleProvider, SchedulerList
     @Override
     public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
         try {
-            owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_VETO_EXECUTION)
+            owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_VETO_EXECUTION, scheduleHelper)
                     .trigger(trigger)
                     .setEventSource(DefaultTaskExecutionContext.contextWrap(context)));
         } catch (SchedulerException e) {
@@ -337,13 +365,13 @@ public class DefaultScheduleProvider implements IScheduleProvider, SchedulerList
 
     @Override
     public void triggerMisfired(Trigger trigger) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_MISFIRED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_MISFIRED, scheduleHelper)
                 .trigger(trigger));
     }
 
     @Override
     public void triggerComplete(Trigger trigger, JobExecutionContext context, Trigger.CompletedExecutionInstruction triggerInstructionCode) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_SCHEDULED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_SCHEDULED, scheduleHelper)
                 .trigger(trigger)
                 .triggerInstructionCode(triggerInstructionCode)
                 .setEventSource(DefaultTaskExecutionContext.contextWrap(context)));
@@ -351,116 +379,116 @@ public class DefaultScheduleProvider implements IScheduleProvider, SchedulerList
 
     @Override
     public void jobScheduled(Trigger trigger) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_SCHEDULED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_SCHEDULED, scheduleHelper)
                 .trigger(trigger));
     }
 
     @Override
     public void jobUnscheduled(TriggerKey triggerKey) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_UNSCHEDULED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_UNSCHEDULED, scheduleHelper)
                 .triggerKey(triggerKey));
     }
 
     @Override
     public void triggerFinalized(Trigger trigger) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_FINALIZED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_FINALIZED, scheduleHelper)
                 .trigger(trigger));
     }
 
     @Override
     public void triggerPaused(TriggerKey triggerKey) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_PAUSED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_PAUSED, scheduleHelper)
                 .triggerKey(triggerKey));
     }
 
     @Override
     public void triggersPaused(String triggerGroup) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_GROUP_PAUSED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_GROUP_PAUSED, scheduleHelper)
                 .triggerGroup(triggerGroup));
     }
 
     @Override
     public void triggerResumed(TriggerKey triggerKey) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_RESUMED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_RESUMED, scheduleHelper)
                 .triggerKey(triggerKey));
     }
 
     @Override
     public void triggersResumed(String triggerGroup) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_GROUP_RESUMED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_GROUP_RESUMED, scheduleHelper)
                 .triggerGroup(triggerGroup));
     }
 
     @Override
     public void jobAdded(JobDetail jobDetail) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_ADDED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_ADDED, scheduleHelper)
                 .jobDetail(jobDetail));
     }
 
     @Override
     public void jobDeleted(JobKey jobKey) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_DELETED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_DELETED, scheduleHelper)
                 .jobKey(jobKey));
     }
 
     @Override
     public void jobPaused(JobKey jobKey) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_GROUP_PAUSED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_GROUP_PAUSED, scheduleHelper)
                 .jobKey(jobKey));
     }
 
     @Override
     public void jobsPaused(String jobGroup) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_GROUP_PAUSED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_GROUP_PAUSED, scheduleHelper)
                 .jobGroup(jobGroup));
     }
 
     @Override
     public void jobResumed(JobKey jobKey) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_RESUMED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_RESUMED, scheduleHelper)
                 .jobKey(jobKey));
     }
 
     @Override
     public void jobsResumed(String jobGroup) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_GROUP_RESUMED)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_GROUP_RESUMED, scheduleHelper)
                 .jobGroup(jobGroup));
     }
 
     @Override
     public void schedulerError(String msg, org.quartz.SchedulerException cause) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULER_ERROR)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULER_ERROR, scheduleHelper)
                 .errorCause(cause)
                 .errorMsg(msg));
     }
 
     @Override
     public void schedulerInStandbyMode() {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULER_IN_STANDBY_MODE));
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULER_IN_STANDBY_MODE, scheduleHelper));
     }
 
     @Override
     public void schedulerStarted() {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULE_STARTED));
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULE_STARTED, scheduleHelper));
     }
 
     @Override
     public void schedulerStarting() {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULE_STARTING));
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULE_STARTING, scheduleHelper));
     }
 
     @Override
     public void schedulerShutdown() {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULE_SHUTDOWN));
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULE_SHUTDOWN, scheduleHelper));
     }
 
     @Override
     public void schedulerShuttingdown() {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULE_SHUTTING_DOWN));
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULE_SHUTTING_DOWN, scheduleHelper));
     }
 
     @Override
     public void schedulingDataCleared() {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULING_DATA_CLEARED));
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.SCHEDULING_DATA_CLEARED, scheduleHelper));
     }
 }

@@ -15,6 +15,7 @@
  */
 package net.ymate.module.schedule;
 
+import net.ymate.module.schedule.support.QuartzScheduleHelper;
 import net.ymate.platform.core.event.AbstractEventContext;
 import net.ymate.platform.core.event.IEvent;
 import org.quartz.*;
@@ -114,8 +115,15 @@ public class ScheduleEvent extends AbstractEventContext<IScheduler, ScheduleEven
         TRIGGER_COMPLETE
     }
 
-    public ScheduleEvent(IScheduler owner, ScheduleEvent.EVENT eventName) {
+    private final QuartzScheduleHelper scheduleHelper;
+
+    public ScheduleEvent(IScheduler owner, ScheduleEvent.EVENT eventName, QuartzScheduleHelper scheduleHelper) {
         super(owner, ScheduleEvent.class, eventName);
+        this.scheduleHelper = scheduleHelper;
+    }
+
+    public QuartzScheduleHelper getScheduleHelper() {
+        return scheduleHelper;
     }
 
     public ITaskExecutionContext getExecutionContext() {
