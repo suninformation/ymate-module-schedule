@@ -26,8 +26,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.Scheduler;
 import org.quartz.*;
+import org.quartz.utils.Key;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2018/05/11 11:34
@@ -155,6 +158,23 @@ public class DefaultScheduleProvider implements IScheduleProvider, SchedulerList
     }
 
     @Override
+    public List<String> getTaskIds() throws SchedulerException {
+        return getTaskIds(null);
+    }
+
+    @Override
+    public List<String> getTaskIds(String group) throws SchedulerException {
+        try {
+            return Collections.unmodifiableList(scheduleHelper.getJobKeys(group)
+                    .stream()
+                    .map(Key::getName)
+                    .collect(Collectors.toList()));
+        } catch (org.quartz.SchedulerException e) {
+            throw new SchedulerException(e);
+        }
+    }
+
+    @Override
     public List<String> getGroupNames() throws SchedulerException {
         try {
             return scheduleHelper.getJobGroupNames();
@@ -248,6 +268,15 @@ public class DefaultScheduleProvider implements IScheduleProvider, SchedulerList
     public void deleteTaskGroup(String group) throws SchedulerException {
         try {
             scheduleHelper.deleteTaskGroup(group);
+        } catch (org.quartz.SchedulerException e) {
+            throw new SchedulerException(e);
+        }
+    }
+
+    @Override
+    public void deleteAll() throws SchedulerException {
+        try {
+            scheduleHelper.deleteAll();
         } catch (org.quartz.SchedulerException e) {
             throw new SchedulerException(e);
         }
@@ -371,7 +400,7 @@ public class DefaultScheduleProvider implements IScheduleProvider, SchedulerList
 
     @Override
     public void triggerComplete(Trigger trigger, JobExecutionContext context, Trigger.CompletedExecutionInstruction triggerInstructionCode) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_SCHEDULED, scheduleHelper)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TRIGGER_COMPLETE, scheduleHelper)
                 .trigger(trigger)
                 .triggerInstructionCode(triggerInstructionCode)
                 .setEventSource(DefaultTaskExecutionContext.contextWrap(context)));
@@ -433,7 +462,7 @@ public class DefaultScheduleProvider implements IScheduleProvider, SchedulerList
 
     @Override
     public void jobPaused(JobKey jobKey) {
-        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_GROUP_PAUSED, scheduleHelper)
+        owner.getOwner().getEvents().fireEvent(new ScheduleEvent(owner, ScheduleEvent.EVENT.TASK_PAUSED, scheduleHelper)
                 .jobKey(jobKey));
     }
 

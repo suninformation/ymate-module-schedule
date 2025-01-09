@@ -35,4 +35,14 @@ public interface ITaskConfigLoader extends IInitialization<IScheduler>, IDestroy
      * @return 返回计划任务规则配置集合
      */
     Collection<ITaskConfig> loadConfigs();
+
+    /**
+     * 是否需要先执行清理动作
+     *
+     * @return 返回true表示需要清理
+     * @since 1.0.2
+     */
+    default boolean isNeedClean() {
+        return false;
+    }
 }

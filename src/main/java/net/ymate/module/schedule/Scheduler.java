@@ -31,7 +31,6 @@ import net.ymate.platform.core.event.IEventListener;
 import net.ymate.platform.core.module.IModule;
 import net.ymate.platform.core.module.IModuleConfigurer;
 import net.ymate.platform.core.module.impl.DefaultModuleConfigurer;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -129,45 +128,13 @@ public final class Scheduler implements IModule, IScheduler {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void doTasksStartup() {
-        IScheduleProvider provider = config.getScheduleProvider();
         try {
-            provider.initialize(this);
-            Collection<ITaskConfig> taskConfigs = config.getTaskConfigLoader().loadConfigs();
-            if (taskConfigs != null && !taskConfigs.isEmpty()) {
-                for (ITaskConfig taskConfig : taskConfigs) {
-                    Class<? extends IScheduleTask> taskClass = null;
-                    ScheduleTaskMeta taskMeta = scheduleTaskMetas.get(taskConfig.getName());
-                    if (taskMeta != null) {
-                        taskClass = taskMeta.getTaskClass();
-                    } else {
-                        try {
-                            taskClass = (Class<? extends IScheduleTask>) ClassUtils.loadClass(taskConfig.getName(), getClass());
-                        } catch (ClassNotFoundException e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn(String.format("Task '%s' could not be found, load failed.", taskConfig.getName()));
-                            }
-                        }
-                    }
-                    if (taskClass != null) {
-                        try {
-                            provider.addOrUpdateTask(taskConfig, taskClass);
-                        } catch (SchedulerException e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn(String.format("An exception occurred when adding or updating task '%s.%s (%s) - %s':", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getId(), taskConfig.getName(), taskClass.getName()), RuntimeUtils.unwrapThrow(e));
-                            }
-                        }
-                    }
-                }
-            } else if (LOG.isInfoEnabled()) {
-                LOG.info("No task configuration was found.");
-            }
-            //
-            provider.start();
+            loadTasks();
+            config.getScheduleProvider().start();
         } catch (Exception e) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(String.format("An exception occurred while starting the scheduled task service '%s': ", provider.getClass().getName()), RuntimeUtils.unwrapThrow(e));
+                LOG.error(String.format("An exception occurred while starting the scheduled task service '%s': ", config.getScheduleProvider().getClass().getName()), RuntimeUtils.unwrapThrow(e));
             }
         }
     }
@@ -214,5 +181,50 @@ public final class Scheduler implements IModule, IScheduler {
                 LOG.debug(String.format("ScheduleTask class [%s:%s] registered.", taskMeta.getName(), taskMeta.getTaskClass().getName()));
             }
         }
+    }
+
+    @Override
+    public void addOrUpdateTasks(Collection<? extends ITaskConfig> taskConfigs) throws Exception {
+        for (ITaskConfig taskConfig : taskConfigs) {
+            addOrUpdateTask(taskConfig);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void addOrUpdateTask(ITaskConfig taskConfig) throws Exception {
+        Class<? extends IScheduleTask> taskClass;
+        ScheduleTaskMeta taskMeta = scheduleTaskMetas.get(taskConfig.getName());
+        if (taskMeta != null) {
+            taskClass = taskMeta.getTaskClass();
+        } else {
+            taskClass = (Class<? extends IScheduleTask>) ClassUtils.loadClass(taskConfig.getName(), getClass());
+        }
+        if (taskClass != null) {
+            if (ITaskConfig.Status.DISABLED.equals(taskConfig.getStatus())) {
+                config.getScheduleProvider().pauseTask(taskConfig.getId(), taskConfig.getGroup());
+            } else {
+                config.getScheduleProvider().addOrUpdateTask(taskConfig, taskClass);
+            }
+        }
+    }
+
+    @Override
+    public void loadTasks() throws Exception {
+        ITaskConfigLoader configLoader = config.getTaskConfigLoader();
+        if (configLoader.isNeedClean()) {
+            cleanTasks();
+        }
+        Collection<ITaskConfig> taskConfigs = configLoader.loadConfigs();
+        if (taskConfigs != null && !taskConfigs.isEmpty()) {
+            addOrUpdateTasks(taskConfigs);
+        } else if (LOG.isInfoEnabled()) {
+            LOG.info("No task configuration was found.");
+        }
+    }
+
+    @Override
+    public void cleanTasks() throws Exception {
+        config.getScheduleProvider().deleteAll();
     }
 }

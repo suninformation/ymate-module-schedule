@@ -73,13 +73,11 @@ public final class DefaultTaskConfigLoader implements ITaskConfigLoader {
         if (StringUtils.isNotBlank(taskConfig.getId())) {
             String taskCron = owner.getOwner().getParam(String.format("%s.task_cron_%s", IScheduler.MODULE_NAME, taskConfig.getId()));
             if (StringUtils.isNotBlank(taskCron)) {
-                if (StringUtils.equalsIgnoreCase(taskCron, ITaskConfig.DISABLED)) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(String.format("TaskConfig %s.%s_%s has been disabled.", StringUtils.defaultIfBlank(taskConfig.getGroup(), ITaskConfig.DEFAULT_GROUP), taskConfig.getName(), taskConfig.getId()));
-                    }
-                } else {
-                    taskConfigs.put(taskConfig.getId(), DefaultTaskConfig.duplicate(taskConfig).cron(taskCron).build());
+                DefaultTaskConfig.Builder taskConfigBuilder = DefaultTaskConfig.duplicate(taskConfig).cron(taskCron);
+                if (ITaskConfig.Status.DISABLED.name().equalsIgnoreCase(taskCron)) {
+                    taskConfigBuilder.status(ITaskConfig.Status.DISABLED);
                 }
+                taskConfigs.put(taskConfig.getId(), taskConfigBuilder.build());
             } else {
                 taskConfigs.put(taskConfig.getId(), taskConfig);
             }

@@ -143,7 +143,8 @@ ymp.params.module.schedule.org.quartz.threadPool.threadPriority=
 | ------ | ------------------------------------------------------------ |
 | id     | 任务唯一标识, 若未提供则根据名称及参数自动生成<br />*注：若任务唯标识重复则后者将覆盖前者* |
 | name   | 计划任务名称或类名称                                         |
-| cron   | 任务执行规则表达式                                           |
+| cron   | 任务执行规则表达式（若为空则任务将采用 SimpleTrigger 仅执行一次） |
+| status | 任务状态设置                                                 |
 | params | 任务扩展参数, 采用 `k=v` 格式并支持以 `$xxx` 格式从框架全局参数中获取 `xxx` 的值<br />例：`key1=$value1`  或 `$key1` |
 
 

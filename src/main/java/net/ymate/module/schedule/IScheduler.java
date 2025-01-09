@@ -20,6 +20,8 @@ import net.ymate.platform.core.beans.annotation.Ignored;
 import net.ymate.platform.core.support.IDestroyable;
 import net.ymate.platform.core.support.IInitialization;
 
+import java.util.Collection;
+
 /**
  * @author 刘镇 (suninformation@163.com) on 2020/01/11 13:11
  */
@@ -49,4 +51,38 @@ public interface IScheduler extends IInitialization<IApplication>, IDestroyable 
      * @throws Exception 可能产生的异常
      */
     void registerTask(Class<? extends IScheduleTask> targetClass) throws Exception;
+
+    /**
+     * 批量添加或更新计划任务
+     *
+     * @param taskConfigs 任务配置集合
+     * @throws Exception 可能产生的异常
+     * @since 1.0.2
+     */
+    void addOrUpdateTasks(Collection<? extends ITaskConfig> taskConfigs) throws Exception;
+
+    /**
+     * 添加或更新计划任务
+     *
+     * @param taskConfig 任务配置
+     * @throws Exception 可能产生的异常
+     * @since 1.0.2
+     */
+    void addOrUpdateTask(ITaskConfig taskConfig) throws Exception;
+
+    /**
+     * 加载(重新注册或更新)任务列表
+     *
+     * @throws Exception 可能产生的异常
+     * @since 1.0.2
+     */
+    void loadTasks() throws Exception;
+
+    /**
+     * 清除全部任务
+     *
+     * @throws Exception 可能产生的异常
+     * @since 1.0.2
+     */
+    void cleanTasks() throws Exception;
 }

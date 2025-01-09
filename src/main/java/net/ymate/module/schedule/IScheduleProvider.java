@@ -89,6 +89,10 @@ public interface IScheduleProvider extends IInitialization<IScheduler>, IDestroy
      */
     boolean hasTask(String id, String group) throws SchedulerException;
 
+    List<String> getTaskIds() throws SchedulerException;
+
+    List<String> getTaskIds(String group) throws SchedulerException;
+
     /**
      * 获取分组名称
      *
@@ -180,6 +184,13 @@ public interface IScheduleProvider extends IInitialization<IScheduler>, IDestroy
      * @throws SchedulerException 可能产生的任务调度异常
      */
     void deleteTaskGroup(String group) throws SchedulerException;
+
+    /**
+     * 删除所有任务
+     *
+     * @throws SchedulerException 可能产生的任务调度异常
+     */
+    void deleteAll() throws SchedulerException;
 
     /**
      * 执行任务

@@ -15,6 +15,7 @@
  */
 package net.ymate.module.schedule.annotation;
 
+import net.ymate.module.schedule.ITaskConfig;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Documented;
@@ -41,9 +42,14 @@ public @interface TaskConfig {
     String name();
 
     /**
-     * @return 任务执行规则表达式
+     * @return 任务执行规则表达式(若为空则任务将采用SimpleTrigger仅执行一次)
      */
     String cron();
+
+    /**
+     * @return 任务状态设置
+     */
+    ITaskConfig.Status status() default ITaskConfig.Status.NORMAL;
 
     /**
      * @return 任务扩展参数, 采用key=value格式(支持以$xxx格式从框架全局参数中获取xxx的值, 例: key1=$value1 或 $key1)

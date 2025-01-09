@@ -75,19 +75,21 @@ public final class QuartzScheduleHelper {
      * @throws SchedulerException 可能产生的任务调度异常
      */
     public boolean addTask(ITaskConfig config, Class<? extends IScheduleTask> taskClass) throws SchedulerException {
-        CronTrigger trigger = getCronTrigger(config);
+        Trigger trigger = getTrigger(config);
         if (trigger == null) {
             TriggerKey triggerKey = TriggerKey.triggerKey(config.getId(), config.getGroup());
-            trigger = TriggerBuilder.newTrigger()
-                    .withIdentity(triggerKey)
-                    .withSchedule(CronScheduleBuilder.cronSchedule(config.getCron())).build();
+            TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
+                    .withIdentity(triggerKey);
+            if (StringUtils.isNotBlank(config.getCron())) {
+                triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(config.getCron()).withMisfireHandlingInstructionDoNothing());
+            }
             //
             scheduler.scheduleJob(JobBuilder.newJob(taskClass)
                     .withIdentity(triggerKey.getName(), triggerKey.getGroup())
-                    .setJobData(doBuildDataMap(config)).build(), trigger);
+                    .setJobData(doBuildDataMap(config)).build(), triggerBuilder.build());
             //
             if (LOG.isDebugEnabled()) {
-                LOG.debug(String.format("Add task %s.%s (%s) - %s with cron: %s", triggerKey.getGroup(), triggerKey.getName(), config.getName(), taskClass.getName(), config.getCron()));
+                LOG.debug(String.format("Add task %s.%s (%s) - %s with cron: %s", triggerKey.getGroup(), triggerKey.getName(), config.getName(), taskClass.getName(), StringUtils.defaultIfBlank(config.getCron(), "EMPTY")));
             }
             return true;
         }
@@ -106,29 +108,38 @@ public final class QuartzScheduleHelper {
     }
 
     public void updateTask(ITaskConfig config) throws SchedulerException {
-        CronTrigger trigger = getCronTrigger(config);
+        Trigger trigger = getTrigger(config);
         if (trigger != null) {
             TriggerKey triggerKey = trigger.getKey();
-            trigger = trigger.getTriggerBuilder()
-                    .withIdentity(triggerKey)
-                    .withSchedule(CronScheduleBuilder.cronSchedule(config.getCron())).build();
-            scheduler.rescheduleJob(triggerKey, trigger);
+            TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
+                    .forJob(trigger.getJobKey())
+                    .modifiedByCalendar(trigger.getCalendarName())
+                    .usingJobData(doBuildDataMap(config))
+                    .withDescription(trigger.getDescription())
+                    .endAt(trigger.getEndTime())
+                    .withIdentity(trigger.getKey())
+                    .withPriority(trigger.getPriority())
+                    .startAt(trigger.getStartTime());
+            if (StringUtils.isNotBlank(config.getCron())) {
+                triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(config.getCron()).withMisfireHandlingInstructionDoNothing());
+            }
+            scheduler.rescheduleJob(triggerKey, triggerBuilder.build());
             //
             if (LOG.isDebugEnabled()) {
-                LOG.debug(String.format("Update task %s.%s with cron: %s", triggerKey.getGroup(), triggerKey.getName(), config.getCron()));
+                LOG.debug(String.format("Update task %s.%s with cron: %s", triggerKey.getGroup(), triggerKey.getName(), StringUtils.defaultIfBlank(config.getCron(), "EMPTY")));
             }
         }
     }
 
-    public CronTrigger getCronTrigger(ITaskConfig config) throws SchedulerException {
-        return getCronTrigger(config.getId(), config.getGroup());
+    public Trigger getTrigger(ITaskConfig config) throws SchedulerException {
+        return getTrigger(config.getId(), config.getGroup());
     }
 
-    public CronTrigger getCronTrigger(String id, String group) throws SchedulerException {
+    public Trigger getTrigger(String id, String group) throws SchedulerException {
         Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(StringUtils.isBlank(group) ? GroupMatcher.anyGroup() : GroupMatcher.groupEquals(group));
         for (TriggerKey triggerKey : triggerKeys) {
             if (triggerKey.getName().equals(id)) {
-                return (CronTrigger) scheduler.getTrigger(triggerKey);
+                return scheduler.getTrigger(triggerKey);
             }
         }
         return null;
@@ -146,21 +157,17 @@ public final class QuartzScheduleHelper {
         return Collections.unmodifiableList(scheduler.getJobGroupNames());
     }
 
-    public List<String> getTriggerGroupNames() throws SchedulerException {
-        return Collections.unmodifiableList(scheduler.getTriggerGroupNames());
-    }
-
     /**
      * @param id 任务ID
      * @return 判断指定id的计划任务是否存在
      * @throws SchedulerException 可能产生的任务调度异常
      */
     public boolean hasTask(String id) throws SchedulerException {
-        return getCronTrigger(id, null) != null;
+        return getTrigger(id, null) != null;
     }
 
     public boolean hasTask(String id, String group) throws SchedulerException {
-        return getCronTrigger(id, group) != null;
+        return getTrigger(id, group) != null;
     }
 
     /**
@@ -267,6 +274,14 @@ public final class QuartzScheduleHelper {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(String.format("Delete task group %s - keys: %s", group, jobKeys));
             }
+        }
+    }
+
+    public void deleteAll() throws SchedulerException {
+        this.scheduler.clear();
+        //
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Delete all tasks");
         }
     }
 

@@ -16,6 +16,7 @@
 package net.ymate.module.schedule;
 
 import net.ymate.platform.core.beans.annotation.Ignored;
+import org.quartz.Scheduler;
 
 import java.util.Map;
 
@@ -27,9 +28,11 @@ import java.util.Map;
 @Ignored
 public interface ITaskConfig {
 
-    String DEFAULT_GROUP = "DEFAULT";
+    String DEFAULT_GROUP = Scheduler.DEFAULT_GROUP;
 
-    String DISABLED = "disabled";
+    enum Status {
+        NORMAL, DISABLED
+    }
 
     /**
      * 获取任务唯一标识, 若未提供则根据名称及参数自动生成
@@ -58,6 +61,13 @@ public interface ITaskConfig {
      * @return 返回任务执行规则表达式
      */
     String getCron();
+
+    /**
+     * 获取任务状态设置
+     *
+     * @return 返回任务状态值
+     */
+    Status getStatus();
 
     /**
      * 获取任务扩展参数

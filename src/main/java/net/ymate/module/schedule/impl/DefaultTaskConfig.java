@@ -38,6 +38,8 @@ public final class DefaultTaskConfig implements ITaskConfig {
 
     private String cron;
 
+    private Status status;
+
     private final Map<String, String> params = new HashMap<>();
 
     public static Builder builder() {
@@ -50,6 +52,7 @@ public final class DefaultTaskConfig implements ITaskConfig {
                 .name(taskConfig.getName())
                 .cron(taskConfig.getCron())
                 .group(taskConfig.getGroup())
+                .status(taskConfig.getStatus())
                 .addParams(taskConfig.getParams());
     }
 
@@ -61,7 +64,8 @@ public final class DefaultTaskConfig implements ITaskConfig {
         Builder configBuilder = builder()
                 .id(taskConfig.id())
                 .name(taskConfig.name())
-                .cron(taskConfig.cron());
+                .cron(taskConfig.cron())
+                .status(taskConfig.status());
         if (StringUtils.isNotBlank(group)) {
             configBuilder.group(group);
         }
@@ -131,6 +135,15 @@ public final class DefaultTaskConfig implements ITaskConfig {
     }
 
     @Override
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    @Override
     public Map<String, String> getParams() {
         return Collections.unmodifiableMap(params);
     }
@@ -163,6 +176,11 @@ public final class DefaultTaskConfig implements ITaskConfig {
 
         public Builder cron(String cron) {
             config.setCron(cron);
+            return this;
+        }
+
+        public Builder status(Status status) {
+            config.setStatus(status);
             return this;
         }
 
